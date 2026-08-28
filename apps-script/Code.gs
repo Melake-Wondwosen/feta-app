@@ -138,7 +138,6 @@ function handleGetOutlets_(e) {
 }
 
 function handleAddOutlet_(payload) {
-  const sheet = sheet_(SHEET_OUTLETS);
   const id = "OUT-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
 
   let photoUrl = "";
@@ -146,18 +145,18 @@ function handleAddOutlet_(payload) {
     photoUrl = savePhotoToDrive_(payload.photo, id);
   }
 
-  sheet.appendRow([
-    id,
-    payload.baId || "",
-    payload.deviceId || "",
-    payload.name || "",
-    payload.address || "",
-    payload.city || "",
-    payload.latitude || "",
-    payload.longitude || "",
-    photoUrl,
-    new Date(),
-  ]);
+  appendByHeader_(sheet_(SHEET_OUTLETS), {
+    id: id,
+    baId: payload.baId || "",
+    deviceId: payload.deviceId || "",
+    name: payload.name || "",
+    address: payload.address || "",
+    city: payload.city || "",
+    latitude: payload.latitude || "",
+    longitude: payload.longitude || "",
+    photoUrl: photoUrl,
+    createdAt: new Date(),
+  });
 
   return json_({ status: "success", id: id });
 }
@@ -190,23 +189,39 @@ function getOrCreateFolder_(name) {
 
 // ─── Winners ─────────────────────────────────────────────────────────
 
+/* Writes a row by matching header names rather than fixed positions, so
+   adding a column to an existing sheet can never misalign the data. */
+function appendByHeader_(sheet, obj) {
+  const headers = sheet
+    .getRange(1, 1, 1, sheet.getLastColumn())
+    .getValues()[0]
+    .map(function (h) {
+      return String(h).trim();
+    });
+
+  const row = headers.map(function (h) {
+    return Object.prototype.hasOwnProperty.call(obj, h) ? obj[h] : "";
+  });
+
+  sheet.appendRow(row);
+}
+
 function handleAddWinner_(payload) {
-  const sheet = sheet_(SHEET_WINNERS);
   const id = "WIN-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
 
-  sheet.appendRow([
-    id,
-    payload.outletId || "",
-    payload.outletName || "",
-    payload.prize || "",
-    payload.tier === "main" ? "main" : "regular",
-    payload.baId || "",
-    payload.fullName || "",
-    payload.phone || "",
-    payload.age || "",
-    payload.gender || "",
-    payload.date || new Date().toISOString(),
-  ]);
+  appendByHeader_(sheet_(SHEET_WINNERS), {
+    id: id,
+    outletId: payload.outletId || "",
+    outletName: payload.outletName || "",
+    prize: payload.prize || "",
+    tier: payload.tier === "main" ? "main" : "regular",
+    baId: payload.baId || "",
+    fullName: payload.fullName || "",
+    phone: payload.phone || "",
+    age: payload.age || "",
+    gender: payload.gender || "",
+    date: payload.date || new Date().toISOString(),
+  });
 
   return json_({ success: true, id: id });
 }
@@ -214,15 +229,14 @@ function handleAddWinner_(payload) {
 /* Every spin is logged, win or not — this is what "people reached"
    counts. Winners only tells you who won something. */
 function handleLogSpin_(payload) {
-  const sheet = sheet_(SHEET_SPINS);
-  sheet.appendRow([
-    "SPN-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
-    payload.outletId || "",
-    payload.baId || "",
-    payload.prize || "",
-    payload.outcome || "", // main | regular | none
-    payload.date || new Date().toISOString(),
-  ]);
+  appendByHeader_(sheet_(SHEET_SPINS), {
+    id: "SPN-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
+    outletId: payload.outletId || "",
+    baId: payload.baId || "",
+    prize: payload.prize || "",
+    outcome: payload.outcome || "", // main | regular | none
+    date: payload.date || new Date().toISOString(),
+  });
   return json_({ success: true });
 }
 
@@ -450,7 +464,29 @@ function createSheetIfMissing_(ss, name, headers) {
   }
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(headers);
+    return sheet;
   }
+
+  /* Sheet already exists with data. Append any headers it's missing —
+     existing rows keep their values, new columns start blank — so an
+     upgrade never requires hand-editing the spreadsheet. */
+  const existing = sheet
+    .getRange(1, 1, 1, sheet.getLastColumn())
+    .getValues()[0]
+    .map(function (h) {
+      return String(h).trim();
+    });
+
+  const missing = headers.filter(function (h) {
+    return existing.indexOf(h) === -1;
+  });
+
+  if (missing.length) {
+    sheet
+      .getRange(1, existing.length + 1, 1, missing.length)
+      .setValues([missing]);
+  }
+
   return sheet;
 }
 
