@@ -52,6 +52,79 @@ export default function SpinWheelPage() {
 
   const canvasRef = useRef(null);
   const wheelDegRef = useRef(0);
+  const audioCtxRef = useRef(null);
+  const lastTickIdxRef = useRef(-1);
+
+  /* Synthesized sound — no audio file to fetch, works offline. A tick
+     plays every time a segment passes the pointer, and a short chime
+     plays on a real win. Created lazily on the first spin tap, since
+     browsers block audio until a user gesture. */
+  function ensureAudio() {
+    if (!audioCtxRef.current) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) audioCtxRef.current = new AC();
+    }
+    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+      audioCtxRef.current.resume();
+    }
+    return audioCtxRef.current;
+  }
+
+  function playTick() {
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "square";
+    osc.frequency.value = 1400;
+    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.045);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.05);
+  }
+
+  function playWinChime() {
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    [660, 880, 1100].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      const start = ctx.currentTime + i * 0.09;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.12, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.28);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.3);
+    });
+  }
+
+  function playNoWinTone() {
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(420, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(220, ctx.currentTime + 0.35);
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.4);
+  }
+
+  function sliceIndexAt(slices, deg) {
+    const normalized = ((-deg % 360) + 360) % 360;
+    const frac = normalized / 360;
+    for (let i = 0; i < slices.length; i++) {
+      if (frac >= slices[i].startFrac && frac < slices[i].endFrac) return i;
+    }
+    return slices.length - 1;
+  }
 
   /* Segments cycle through the four brand inks so no two neighbours
      ever share a colour: cream, red, gold, ink, amber, deep red. */
@@ -67,14 +140,19 @@ export default function SpinWheelPage() {
 
   useEffect(() => {
     const updateSize = () => {
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      const size = Math.min(Math.floor(Math.min(vw, vh) * 0.86), 500);
+      const vw = window.visualViewport?.width || window.innerWidth;
+      const vh = window.visualViewport?.height || window.innerHeight;
+      const columnWidth = Math.min(vw, 448); // matches the app's max-w-md column
+      const size = Math.min(Math.floor(Math.min(columnWidth, vh) * 0.86), 500);
       setWheelSize(size);
     };
     updateSize();
     window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
+    window.visualViewport?.addEventListener("resize", updateSize);
+    return () => {
+      window.removeEventListener("resize", updateSize);
+      window.visualViewport?.removeEventListener("resize", updateSize);
+    };
   }, []);
 
   useEffect(() => {
@@ -333,9 +411,13 @@ export default function SpinWheelPage() {
 
   const spin = () => {
     if (spinning || campaign.length === 0) return;
+    ensureAudio();
     setSpinning(true);
     setWinner(null);
     setHasSpun(true);
+
+    const slices = buildSlices(campaign);
+    lastTickIdxRef.current = sliceIndexAt(slices, wheelDegRef.current);
 
     const extraDeg = 360 * 6 + Math.random() * 360 * 3;
     const finalDeg = wheelDegRef.current + extraDeg;
@@ -349,6 +431,13 @@ export default function SpinWheelPage() {
       const current = startDeg + (finalDeg - startDeg) * easeOut(t);
       wheelDegRef.current = current;
       drawWheel(current);
+
+      const idx = sliceIndexAt(slices, current);
+      if (idx !== lastTickIdxRef.current) {
+        lastTickIdxRef.current = idx;
+        playTick();
+      }
+
       if (t < 1) {
         requestAnimationFrame(animate);
         return;
@@ -356,12 +445,14 @@ export default function SpinWheelPage() {
 
       wheelDegRef.current = finalDeg;
       drawWheel(finalDeg);
-      const slices = buildSlices(campaign);
       const result = readPointer(slices, finalDeg);
       setSpinning(false);
       setWinner({ label: result.label, isNoWin: result.isNoWin });
 
-      if (!result.isNoWin) {
+      if (result.isNoWin) {
+        playNoWinTone();
+      } else {
+        playWinChime();
         if (result.tier === "main") {
           setTimeout(() => {
             navigate("/winner-register", {
@@ -384,7 +475,7 @@ export default function SpinWheelPage() {
 
   return (
     <div
-      className="relative w-screen h-screen overflow-hidden flex flex-col"
+      className="relative h-[100dvh] max-w-md mx-auto overflow-hidden flex flex-col"
       style={{
         background: `radial-gradient(90% 60% at 50% 42%, ${FETA.red} 0%, ${FETA.redDeep} 55%, ${FETA.redDark} 100%)`,
         color: FETA.cream,
@@ -398,8 +489,8 @@ export default function SpinWheelPage() {
         style={{
           top: "50%",
           left: "50%",
-          width: "170vmax",
-          height: "170vmax",
+          width: "220%",
+          height: "220%",
           transform: "translate(-50%, -50%)",
         }}
       />

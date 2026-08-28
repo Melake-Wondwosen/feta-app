@@ -106,7 +106,7 @@ export default function WinnerRegistrationPage() {
 
   return (
     <div
-      className="relative h-screen max-w-md mx-auto overflow-hidden flex flex-col"
+      className="relative h-[100dvh] max-w-md mx-auto overflow-hidden flex flex-col"
       style={{
         background: `radial-gradient(110% 60% at 50% 0%, ${FETA.red} 0%, ${FETA.redDeep} 55%, ${FETA.redDark} 100%)`,
         color: FETA.cream,
