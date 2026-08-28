@@ -5,6 +5,7 @@ import { FaPlus, FaStore, FaFileDownload, FaSlidersH } from "react-icons/fa";
 import { getOutlets } from "../services/outletService";
 import { getDeviceId } from "../services/deviceId";
 import { isAdmin } from "../components/AdminRoute";
+import { API_URL } from "../config";
 import {
   FETA,
   FetaMark,
@@ -20,9 +21,6 @@ export default function HomePage() {
 
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-
-  const API_URL =
-    "https://script.google.com/macros/s/AKfycbwWZcenN_NwVuPi6WCxt8-T4UTKp9751y_Th3YwzcVunDD_1kaaXUjdnCqGso9Wu0wsyg/exec";
 
   useEffect(() => {
     if (!user) return;

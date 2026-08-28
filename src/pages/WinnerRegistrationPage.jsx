@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 import {
   FETA,
   FetaMark,
@@ -27,9 +28,6 @@ export default function WinnerRegistrationPage() {
       navigate(`/spin/${outletId}`);
     }
   }, []);
-
-  const API_URL =
-    "https://script.google.com/macros/s/AKfycbwWZcenN_NwVuPi6WCxt8-T4UTKp9751y_Th3YwzcVunDD_1kaaXUjdnCqGso9Wu0wsyg/exec";
 
   const submit = async () => {
     if (!fullName || !phone) {

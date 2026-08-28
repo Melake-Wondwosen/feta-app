@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getDeviceId } from "../services/deviceId";
+import { API_URL } from "../config";
 import {
   FETA,
   FetaMark,
@@ -25,9 +26,6 @@ export default function AddOutletPage() {
   const [preview, setPreview] = useState("");
 
   const [loading, setLoading] = useState(false);
-
-  const API_URL =
-    "https://script.google.com/macros/s/AKfycbwWZcenN_NwVuPi6WCxt8-T4UTKp9751y_Th3YwzcVunDD_1kaaXUjdnCqGso9Wu0wsyg/exec";
 
   const cities = [
     "Addis Ababa",

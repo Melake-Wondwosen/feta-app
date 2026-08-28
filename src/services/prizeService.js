@@ -1,5 +1,4 @@
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbwWZcenN_NwVuPi6WCxt8-T4UTKp9751y_Th3YwzcVunDD_1kaaXUjdnCqGso9Wu0wsyg/exec";
+import { API_URL } from "../config";
 
 const CACHE_KEY = "feta_prize_list";
 const CACHE_TIME_KEY = "feta_prize_list_saved_at";
