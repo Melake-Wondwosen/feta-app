@@ -61,6 +61,16 @@ export default function CampaignSetupPage() {
     setPrizes(updated);
   };
 
+  const toggleTier = (index) => {
+    setPrizes((prev) =>
+      prev.map((p, i) =>
+        i === index
+          ? { ...p, tier: p.tier === "main" ? "regular" : "main" }
+          : p
+      )
+    );
+  };
+
   const removePrize = (index) => {
     const updated = [...prizes];
     updated.splice(index, 1);
@@ -193,6 +203,15 @@ export default function CampaignSetupPage() {
         <div>
           <SectionLabel>On the wheel</SectionLabel>
 
+          {prizes.length > 0 && (
+            <p
+              className="text-xs font-semibold mb-2.5"
+              style={{ color: `${FETA.cream}AA` }}
+            >
+              Tap a prize's tier to change it for this outlet only.
+            </p>
+          )}
+
           {prizes.length === 0 ? (
             <div
               className="rounded-xl py-5 px-4 text-center"
@@ -237,6 +256,33 @@ export default function CampaignSetupPage() {
                       className="feta-field flex-1 !py-2 text-center"
                     />
                   </div>
+
+                  <div className="flex items-center gap-3 mt-3">
+                    <span className="feta-eyebrow" style={{ color: FETA.redDeep }}>
+                      Tier
+                    </span>
+                    <button
+                      onClick={() => toggleTier(index)}
+                      aria-label={`Change tier for ${prize.name}`}
+                      className="feta-eyebrow ml-auto px-3 py-2 rounded-md"
+                      style={{
+                        background:
+                          prize.tier === "main" ? FETA.red : `${FETA.ink}1A`,
+                        color: prize.tier === "main" ? FETA.cream : FETA.ink,
+                      }}
+                    >
+                      {prize.tier === "main" ? "★ Main prize" : "Regular prize"}
+                    </button>
+                  </div>
+
+                  <p
+                    className="text-xs font-semibold mt-2"
+                    style={{ color: `${FETA.ink}99` }}
+                  >
+                    {prize.tier === "main"
+                      ? "Winner fills in name and phone."
+                      : "Winner just sees the message, then spin again."}
+                  </p>
                 </div>
               ))}
             </div>
