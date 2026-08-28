@@ -1,110 +1,76 @@
 import { useNavigate } from "react-router-dom";
-
-import logo from "../assets/Feta_Logo.png";
-// TODO: replace with real Feta tibeb pattern asset
-const mandalaPattern = null;
+import {
+  FETA,
+  FetaLockup,
+  FetaButton,
+  Screen,
+  TibebBand,
+  TibebField,
+} from "../brand/FetaBrand";
 
 export default function StartPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="relative min-h-screen max-w-md mx-auto overflow-hidden bg-black text-white">
-
-      {/* Background Glow */}
-      <div className="absolute inset-0 bg-black" />
-
-      {/* Mandala Background */}
-      <div
-        className="absolute inset-0 opacity-[0.08]"
-        style={{
-          backgroundImage: mandalaPattern ? `url(${mandalaPattern})` : 'none',
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center",
-          backgroundSize: "95%",
-        }}
+    <Screen>
+      <TibebField
+        opacity={0.16}
+        className="absolute inset-x-0 pointer-events-none"
+        style={{ top: "12%", height: "42%" }}
       />
 
-      {/* Gold Ambient Glow */}
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 w-72 h-72 bg-yellow-400/10 blur-[120px]" />
+      <div className="relative flex flex-col flex-1 px-6 pt-10 pb-8">
+        {/* Hero: the full artwork is the thesis — three friends, one bump. */}
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <FetaLockup
+            className="w-64 max-w-full drop-shadow-[0_14px_30px_rgba(0,0,0,0.45)]"
+            alt="Feta — three friends bumping fists over the Feta wordmark"
+          />
 
-      {/* Main Content */}
-      <div className="relative z-10 flex flex-col min-h-screen px-8 py-10">
-
-        {/* Logo Section */}
-        <div className="flex justify-center mt-8">
-          <div className="relative">
-            <div className="absolute inset-0 bg-yellow-400/20 blur-3xl rounded-full" />
-
-            <img
-              src={logo}
-              alt="Habesha Golden Wheel"
-              className="relative w-56 object-contain"
-            />
-          </div>
-        </div>
-
-        {/* Center Content */}
-        <div className="flex-1 flex flex-col items-center justify-center text-center">
-
-          {/* Small Premium Label */}
-          <div className="mb-6">
-            <span className="px-4 py-1 text-xs tracking-[0.3em] uppercase rounded-full border border-yellow-500/30 text-yellow-300">
-              Spin & Win
-            </span>
-          </div>
-
-          {/* Main Title */}
-          <div className="space-y-2">
-
-            <h1 className="text-5xl font-black tracking-tight bg-gradient-to-r from-[#B8892F] via-[#F5E38A] to-[#B8892F] bg-clip-text text-transparent">
-              GOLDEN  WHEEL
-            </h1>
-
-            {/* <h1 className="text-5xl font-black tracking-tight bg-gradient-to-r from-[#B8892F] via-[#F5E38A] to-[#B8892F] bg-clip-text text-transparent">
-             
-            </h1> */}
-
-          </div>
-
-          {/* Divider */}
-          <div className="w-28 h-[2px] bg-gradient-to-r from-transparent via-[#F5E38A] to-transparent my-6" />
-
-          {/* Subtitle */}
-          <p className="text-zinc-400 text-sm tracking-wide max-w-[260px] leading-relaxed">
-            Trade_Marketing
+          <p
+            className="am mt-5 text-3xl"
+            style={{
+              color: FETA.cream,
+              fontWeight: 700,
+              textShadow: `3px 3px 0 ${FETA.ink}`,
+            }}
+          >
+            ከጓደኛ ጋር
           </p>
 
-        </div>
+          <div className="w-40 my-5">
+            <TibebBand height={18} ground={FETA.amber} line={FETA.redDeep} />
+          </div>
 
-        {/* Start Button */}
-        <div className="pb-6">
-
-          <button
-            onClick={() => navigate("/login")}
-            className="
-              w-full
-              h-16
-              rounded-2xl
-              bg-gradient-to-r
-              from-[#B8892F]
-              via-[#F5E38A]
-              to-[#B8892F]
-              text-black
-              font-extrabold
-              tracking-[0.2em]
-              text-lg
-              shadow-[0_10px_40px_rgba(234,179,8,0.25)]
-              active:scale-95
-              transition-all
-              duration-200
-            "
+          <h1
+            className="feta-display text-5xl text-center"
+            style={{
+              color: FETA.cream,
+              textShadow: `4px 4px 0 ${FETA.ink}, 8px 8px 0 ${FETA.gold}`,
+            }}
           >
-            START→
-          </button>
+            Feta
+            <br />
+            Wheel
+          </h1>
 
+          <p
+            className="mt-6 text-sm text-center max-w-[250px] leading-relaxed"
+            style={{ color: FETA.amber, fontWeight: 600 }}
+          >
+            Set up an outlet, spin for a prize, register the winner on the spot.
+          </p>
         </div>
 
+        <FetaButton onClick={() => navigate("/login")}>Start →</FetaButton>
+
+        <p
+          className="feta-eyebrow text-center mt-5"
+          style={{ color: `${FETA.cream}88` }}
+        >
+          Trade Marketing · 21+
+        </p>
       </div>
-    </div>
+    </Screen>
   );
 }

@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { FaUser, FaLock } from "react-icons/fa";
-import logo from "../assets/Feta_Logo.png";
 import { loginUser } from "../services/authSevice";
+import { FETA, FetaMark, FetaButton, Screen, TibebBand } from "../brand/FetaBrand";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -18,203 +18,138 @@ export default function LoginPage() {
     setError("");
 
     if (!username || !password) {
-      setError("Please enter username and password.");
+      setError("Enter your username and password to continue.");
       return;
     }
 
     try {
       setLoading(true);
+      const result = await loginUser(username, password);
 
-      // Temporary Login
-     const result =
-  await loginUser(
-    username,
-    password
-  );
-
-    if (result.success) {
-
-      login(result.user);
-
-      navigate("/home");
-
-    } else {
-
-      setError(result.message);
-    }
+      if (result.success) {
+        login(result.user);
+        navigate("/home");
+      } else {
+        setError(result.message);
+      }
     } catch (err) {
-      setError("Unable to login. Please try again.");
+      setError("Could not reach the server. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen max-w-md mx-auto bg-gradient-to-b from-black via-[#120c00] to-black flex flex-col justify-center px-6 relative overflow-hidden">
+    <Screen>
+      <div className="flex flex-col flex-1 justify-center px-6 py-10">
+        {/* Header */}
+        <div className="text-center mb-7">
+          <FetaMark className="w-24 mx-auto drop-shadow-[0_10px_20px_rgba(0,0,0,0.4)]" />
 
-      {/* Background Glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(234,179,8,0.08),transparent_60%)]" />
+          <h1
+            className="feta-display text-4xl mt-5"
+            style={{ color: FETA.cream, textShadow: `3px 3px 0 ${FETA.ink}` }}
+          >
+            Sign in
+          </h1>
 
-      {/* Gold Blobs */}
-      <div className="absolute w-72 h-72 bg-yellow-500/10 blur-3xl rounded-full top-[-100px] left-[-100px]" />
-      <div className="absolute w-72 h-72 bg-yellow-600/10 blur-3xl rounded-full bottom-[-120px] right-[-120px]" />
+          <p className="am text-lg mt-1" style={{ color: FETA.amber, fontWeight: 600 }}>
+            ከጓደኛ ጋር
+          </p>
+        </div>
 
-      {/* Header */}
-      <div className="text-center mb-8 z-10">
+        {/* Card — cream panel built with the wordmark keyline */}
+        <div
+          className="feta-lockup p-6 pt-5"
+          style={{ background: FETA.cream, color: FETA.ink }}
+        >
+          <div className="-mx-6 -mt-5 mb-5 overflow-hidden rounded-t-[18px]">
+            <TibebBand height={20} ground={FETA.red} line={FETA.cream} />
+          </div>
 
-        <img
-          src={logo}
-          alt="Habesha Logo"
-          className="w-32 mx-auto mb-5 object-contain"
-        />
-
-        <div className="w-20 h-[2px] bg-yellow-500 mx-auto mb-5 rounded-full" />
-
-        <h1 className="text-white text-3xl font-bold">
-          Welcome Back
-        </h1>
-
-        <p className="text-gray-400 mt-2 text-sm">
-          Sign in to continue your activation
-        </p>
-
-      </div>
-
-      {/* Login Card */}
-      <div className="bg-white/5 backdrop-blur-md border border-yellow-500/20 rounded-3xl p-6 shadow-xl z-10">
-
-        {/* Username */}
-        <div className="mb-4">
-
-          <label className="text-gray-400 text-xs mb-2 block">
+          {/* Username */}
+          <label className="feta-eyebrow block mb-2" style={{ color: FETA.redDeep }}>
             Username
           </label>
-
-          <div className="relative">
-            <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-500" />
-
+          <div className="relative mb-4">
+            <FaUser
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-10"
+              style={{ color: FETA.red }}
+            />
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
-              className="
-                w-full
-                bg-black/30
-                border border-yellow-500/20
-                rounded-xl
-                py-3
-                pl-12
-                pr-4
-                text-white
-                placeholder-gray-500
-                focus:outline-none
-                focus:border-yellow-400
-                focus:ring-2
-                focus:ring-yellow-500/30
-                transition-all
-              "
+              placeholder="Your username"
+              autoComplete="username"
+              className="feta-field pl-12"
             />
           </div>
-        </div>
 
-        {/* Password */}
-        <div className="mb-4">
-
-          <label className="text-gray-400 text-xs mb-2 block">
+          {/* Password */}
+          <label className="feta-eyebrow block mb-2" style={{ color: FETA.redDeep }}>
             Password
           </label>
-
-          <div className="relative">
-            <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-500" />
-
+          <div className="relative mb-5">
+            <FaLock
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-10"
+              style={{ color: FETA.red }}
+            />
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
-              className="
-                w-full
-                bg-black/30
-                border border-yellow-500/20
-                rounded-xl
-                py-3
-                pl-12
-                pr-4
-                text-white
-                placeholder-gray-500
-                focus:outline-none
-                focus:border-yellow-400
-                focus:ring-2
-                focus:ring-yellow-500/30
-                transition-all
-              "
+              placeholder="Your password"
+              autoComplete="current-password"
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+              className="feta-field pl-12"
             />
           </div>
+
+          {error && (
+            <div
+              className="rounded-xl px-4 py-3 mb-5 text-sm font-semibold"
+              style={{
+                background: `${FETA.red}18`,
+                color: FETA.redDeep,
+                boxShadow: `0 0 0 2px ${FETA.red}`,
+              }}
+              role="alert"
+            >
+              {error}
+            </div>
+          )}
+
+          <FetaButton
+            onClick={handleLogin}
+            disabled={loading}
+            variant="gold"
+            className="!text-base"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-3">
+                <span
+                  className="w-4 h-4 rounded-full animate-spin"
+                  style={{
+                    border: `3px solid ${FETA.ink}44`,
+                    borderTopColor: FETA.ink,
+                  }}
+                />
+                Signing in…
+              </span>
+            ) : (
+              "Sign in"
+            )}
+          </FetaButton>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-3 py-2 mb-4">
-            <p className="text-red-400 text-xs">
-              {error}
-            </p>
-          </div>
-        )}
-
-        {/* Login Button */}
-        <button
-          onClick={handleLogin}
-          disabled={loading}
-          className="
-            w-full
-            py-3
-            rounded-xl
-            font-bold
-            text-black
-            bg-gradient-to-r
-            from-yellow-600
-            via-yellow-400
-            to-yellow-500
-            shadow-[0_0_25px_rgba(234,179,8,0.35)]
-            hover:scale-[1.01]
-            active:scale-95
-            transition-all
-            duration-300
-            disabled:opacity-60
-          "
+        <p
+          className="feta-eyebrow text-center mt-7"
+          style={{ color: `${FETA.cream}80` }}
         >
-          {loading ? (
-            <div className="flex items-center justify-center gap-2">
-
-              <div
-                className="
-                  w-4
-                  h-4
-                  border-2
-                  border-black
-                  border-t-transparent
-                  rounded-full
-                  animate-spin
-                "
-              />
-
-              Signing In...
-            </div>
-          ) : (
-            "LOGIN"
-          )}
-        </button>
-
-      </div>
-
-      {/* Footer */}
-      <div className="text-center mt-8 z-10">
-        <p className="text-gray-600 text-xs">
-          Habesha Trade Activation Platform
+          Feta Trade Activation · 21+
         </p>
       </div>
-
-    </div>
+    </Screen>
   );
 }
