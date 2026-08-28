@@ -40,24 +40,6 @@ function useCountUp(target, duration = 800) {
   return value;
 }
 
-function Chip({ active, children, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className="feta-eyebrow px-3 py-2 rounded-lg flex-none whitespace-nowrap"
-      style={{
-        background: active ? FETA.amber : `${FETA.cream}1A`,
-        color: active ? FETA.ink : FETA.cream,
-        boxShadow: active
-          ? `0 0 0 2px ${FETA.gold}, 0 0 0 4px ${FETA.ink}`
-          : `0 0 0 1.5px ${FETA.cream}44`,
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
 function HeadlineStat({ label, value, sub }) {
   const shown = useCountUp(value);
   return (
@@ -122,8 +104,6 @@ export default function ManagerDashboardPage() {
   const weeks = useMemo(() => weeksOfMonth(), []);
 
   const [range, setRange] = useState(presets[0]); // Today
-  const [custom, setCustom] = useState({ from: "", to: "" });
-  const [showCustom, setShowCustom] = useState(false);
 
   const [stats, setStats] = useState(null);
   const [error, setError] = useState("");
@@ -154,19 +134,6 @@ export default function ManagerDashboardPage() {
     };
   }, [user, range]);
 
-  const applyCustom = () => {
-    if (!custom.from && !custom.to) return;
-    const from = custom.from || custom.to;
-    const to = custom.to || custom.from;
-    setRange({
-      key: "custom",
-      label: "Custom",
-      from: from <= to ? from : to,
-      to: from <= to ? to : from,
-    });
-    setShowCustom(false);
-  };
-
   const totalWins =
     (stats?.mainPrizeWins || 0) + (stats?.regularPrizeWins || 0);
   const conversion =
@@ -193,89 +160,61 @@ export default function ManagerDashboardPage() {
           </div>
         </div>
 
-        {/* Period picker */}
-        <div className="mb-5">
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-            {presets.map((p) => (
-              <Chip
-                key={p.key}
-                active={range.key === p.key}
-                onClick={() => setRange(p)}
-              >
-                {p.label}
-              </Chip>
-            ))}
+        {/* Period picker — one dropdown for the day range, one for the
+            week of this month. Choosing from either replaces the other. */}
+        <div className="mb-5 flex gap-3">
+          <div className="flex-1 min-w-0">
+            <label className="feta-eyebrow block mb-1.5" style={{ color: FETA.amber }}>
+              Date
+            </label>
+            <select
+              value={presets.some((p) => p.key === range.key) ? range.key : ""}
+              onChange={(e) => {
+                const p = presets.find((x) => x.key === e.target.value);
+                if (p) setRange(p);
+              }}
+              className="feta-field !py-2.5 !text-sm"
+            >
+              {!presets.some((p) => p.key === range.key) && (
+                <option value="">{range.label}</option>
+              )}
+              {presets.map((p) => (
+                <option key={p.key} value={p.key}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-            {weeks.map((w) => (
-              <Chip
-                key={w.key}
-                active={range.key === w.key}
-                onClick={() => setRange(w)}
-              >
-                {w.label}
-              </Chip>
-            ))}
-            <Chip
-              active={range.key === "custom"}
-              onClick={() => setShowCustom((v) => !v)}
+          <div className="flex-1 min-w-0">
+            <label className="feta-eyebrow block mb-1.5" style={{ color: FETA.amber }}>
+              Week
+            </label>
+            <select
+              value={weeks.some((w) => w.key === range.key) ? range.key : ""}
+              onChange={(e) => {
+                const w = weeks.find((x) => x.key === e.target.value);
+                if (w) setRange(w);
+              }}
+              className="feta-field !py-2.5 !text-sm"
             >
-              Pick dates
-            </Chip>
+              <option value="">Choose a week</option>
+              {weeks.map((w) => (
+                <option key={w.key} value={w.key}>
+                  {w.label}
+                </option>
+              ))}
+            </select>
           </div>
-
-          {showCustom && (
-            <div
-              className="feta-lockup-flat p-4 mt-2"
-              style={{ background: FETA.cream, color: FETA.ink }}
-            >
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className="feta-eyebrow block mb-1.5" style={{ color: FETA.redDeep }}>
-                    From
-                  </label>
-                  <input
-                    type="date"
-                    value={custom.from}
-                    onChange={(e) => setCustom({ ...custom, from: e.target.value })}
-                    className="feta-field !py-2 !text-sm"
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="feta-eyebrow block mb-1.5" style={{ color: FETA.redDeep }}>
-                    To
-                  </label>
-                  <input
-                    type="date"
-                    value={custom.to}
-                    onChange={(e) => setCustom({ ...custom, to: e.target.value })}
-                    className="feta-field !py-2 !text-sm"
-                  />
-                </div>
-              </div>
-              <button
-                onClick={applyCustom}
-                className="feta-press w-full mt-3 py-2.5 rounded-xl feta-display text-xs"
-                style={{
-                  background: FETA.amber,
-                  color: FETA.ink,
-                  boxShadow: `0 0 0 2px ${FETA.gold}, 0 0 0 4px ${FETA.ink}`,
-                }}
-              >
-                Show these dates
-              </button>
-            </div>
-          )}
-
-          <p
-            className="text-xs font-bold mt-2 text-center"
-            style={{ color: FETA.amber }}
-          >
-            Showing {describeRange(range.from, range.to)}
-            {loading && stats ? " · updating…" : ""}
-          </p>
         </div>
+
+        <p
+          className="text-xs font-bold mb-5 text-center"
+          style={{ color: FETA.amber }}
+        >
+          Showing {describeRange(range.from, range.to)}
+          {loading && stats ? " · updating…" : ""}
+        </p>
 
         {loading && !stats && (
           <p
