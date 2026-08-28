@@ -149,7 +149,7 @@ export default function WinnerRegistrationPage() {
           {fillTemplate(winMessage, prize || "a prize")}
         </h1>
         <div className="w-32 mt-4">
-          <TibebBand height={16} ground={FETA.amber} line={FETA.redDeep} />
+          <TibebBand height={16} tiles={8} ground={FETA.amber} line={FETA.redDeep} />
         </div>
       </div>
 

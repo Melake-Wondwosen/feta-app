@@ -75,10 +75,17 @@ export function TibebBand({
   line = FETA.red,
   opacity = 1,
   flip = false,
+  tiles = 0,
   className = "",
 }) {
   const id = useId().replace(/:/g, "");
   const s = height / 43;
+
+  /* With `tiles` set, the band scales so exactly that many whole motifs
+     span the full width — nothing is clipped mid-repeat at the edges.
+     Without it, the motif keeps its natural pixel size and simply
+     repeats, which is what the wide full-bleed trims want. */
+  const fitted = tiles > 0;
 
   return (
     <svg
@@ -86,6 +93,8 @@ export function TibebBand({
       height={height}
       aria-hidden="true"
       className={className}
+      viewBox={fitted ? `0 0 ${44 * tiles} 43` : undefined}
+      preserveAspectRatio={fitted ? "none" : undefined}
       style={{
         opacity,
         display: "block",
@@ -95,11 +104,11 @@ export function TibebBand({
       <defs>
         <pattern
           id={`tb-${id}`}
-          width={44 * s}
-          height={height}
+          width={fitted ? 44 : 44 * s}
+          height={fitted ? 43 : height}
           patternUnits="userSpaceOnUse"
         >
-          <g transform={`scale(${s})`}>
+          <g transform={fitted ? undefined : `scale(${s})`}>
             <rect width="44" height="43" fill={ground} />
             <g
               fill="none"

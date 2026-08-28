@@ -39,7 +39,7 @@ export default function StartPage() {
           </p>
 
           <div className="w-40 my-5">
-            <TibebBand height={18} ground={FETA.amber} line={FETA.redDeep} />
+            <TibebBand height={18} tiles={9} ground={FETA.amber} line={FETA.redDeep} />
           </div>
 
           <h1

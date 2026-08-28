@@ -68,7 +68,7 @@ function HeadlineStat({ label, value, sub }) {
         </p>
       )}
       <div className="w-24 mx-auto mt-4">
-        <TibebBand height={13} ground={FETA.amber} line={FETA.redDeep} />
+        <TibebBand height={13} tiles={7} ground={FETA.amber} line={FETA.redDeep} />
       </div>
     </div>
   );
