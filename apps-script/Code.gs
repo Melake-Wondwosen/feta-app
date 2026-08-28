@@ -331,6 +331,8 @@ function handleSavePrizes_(payload) {
    A manager with no region set sees every region. */
 function handleManagerStats_(e) {
   const region = String(e.parameter.region || "").trim();
+  const from = String(e.parameter.from || "").trim(); // YYYY-MM-DD inclusive
+  const to = String(e.parameter.to || "").trim();     // YYYY-MM-DD inclusive
   const LIVE_WINDOW_MIN = 15;
 
   const users = rowsToObjects_(sheet_(SHEET_USERS));
@@ -353,32 +355,79 @@ function handleManagerStats_(e) {
 
   const mine = (row) => !region || baIds[String(row.baId)];
 
-  const spins = rowsToObjects_(sheet_(SHEET_SPINS)).filter(mine);
-  const winners = rowsToObjects_(sheet_(SHEET_WINNERS)).filter(mine);
-  const outlets = rowsToObjects_(sheet_(SHEET_OUTLETS)).filter(
+  /* Date filter is inclusive on both ends. An empty from/to means
+     unbounded on that side, so no params at all gives all time. */
+  const inRange = (row, dateField) => {
+    const d = isoDate_(row[dateField || "date"]);
+    if (!d) return false;
+    if (from && d < from) return false;
+    if (to && d > to) return false;
+    return true;
+  };
+
+  const allSpins = rowsToObjects_(sheet_(SHEET_SPINS)).filter(mine);
+  const allWinners = rowsToObjects_(sheet_(SHEET_WINNERS)).filter(mine);
+  const allOutlets = rowsToObjects_(sheet_(SHEET_OUTLETS)).filter(
     (o) => !region || baIds[String(o.baId)]
   );
 
-  const today = new Date().toISOString().split("T")[0];
-  const isToday = (row) => isoDate_(row.date) === today;
+  const spins = allSpins.filter((r) => inRange(r));
+  const winners = allWinners.filter((r) => inRange(r));
+  const outlets = allOutlets.filter((r) => inRange(r, "createdAt"));
 
   const mainWins = winners.filter((w) => String(w.tier) === "main");
   const regularWins = winners.filter((w) => String(w.tier) !== "main");
+
+  /* Per-BA breakdown for the selected period, best performer first. */
+  const byBA = {};
+  spins.forEach((s) => {
+    const key = String(s.baId || "");
+    if (!byBA[key]) byBA[key] = { reached: 0, wins: 0 };
+    byBA[key].reached += 1;
+  });
+  winners.forEach((w) => {
+    const key = String(w.baId || "");
+    if (!byBA[key]) byBA[key] = { reached: 0, wins: 0 };
+    byBA[key].wins += 1;
+  });
+
+  const baBreakdown = Object.keys(byBA)
+    .map((key) => {
+      const u = baIds[key];
+      return {
+        id: key,
+        name: u ? u.name || u.username : "Unknown",
+        reached: byBA[key].reached,
+        wins: byBA[key].wins,
+      };
+    })
+    .sort((a, b) => b.reached - a.reached)
+    .slice(0, 10);
 
   return json_({
     success: true,
     stats: {
       region: region || "All regions",
+      from: from,
+      to: to,
+
+      // Always "right now", never affected by the date filter.
       liveBAs: liveBAs.length,
       totalBAs: bas.length,
-      peopleReached: spins.length,
-      reachedToday: spins.filter(isToday).length,
-      mainPrizeWins: mainWins.length,
-      mainPrizeWinsToday: mainWins.filter(isToday).length,
-      regularPrizeWins: regularWins.length,
-      regularPrizeWinsToday: regularWins.filter(isToday).length,
-      outlets: outlets.length,
       liveBAList: liveBAs.map((b) => ({ name: b.name || b.username, id: b.id })),
+
+      // Scoped to the selected period.
+      peopleReached: spins.length,
+      mainPrizeWins: mainWins.length,
+      regularPrizeWins: regularWins.length,
+      outlets: outlets.length,
+      baBreakdown: baBreakdown,
+
+      // All-time totals, for context alongside the period figures.
+      peopleReachedAllTime: allSpins.length,
+      mainPrizeWinsAllTime: allWinners.filter((w) => String(w.tier) === "main").length,
+      regularPrizeWinsAllTime: allWinners.filter((w) => String(w.tier) !== "main").length,
+      outletsAllTime: allOutlets.length,
     },
   });
 }

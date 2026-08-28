@@ -1,9 +1,15 @@
 import { API_URL } from "../config";
 
-export async function getManagerStats(region) {
-  const res = await fetch(
-    `${API_URL}?action=managerStats&region=${encodeURIComponent(region || "")}&t=${Date.now()}`
-  );
+export async function getManagerStats(region, from = "", to = "") {
+  const params = new URLSearchParams({
+    action: "managerStats",
+    region: region || "",
+    from: from || "",
+    to: to || "",
+    t: String(Date.now()),
+  });
+
+  const res = await fetch(`${API_URL}?${params.toString()}`);
   const data = await res.json();
   if (!data.success) {
     throw new Error(data.message || "Couldn't load the figures.");

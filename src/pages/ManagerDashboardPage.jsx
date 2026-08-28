@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -9,10 +9,11 @@ import {
   TibebBand,
 } from "../brand/FetaBrand";
 import { getManagerStats } from "../services/statsService";
+import { buildPresets, weeksOfMonth, describeRange } from "../services/dateRanges";
 
 const REFRESH_MS = 60000;
 
-function useCountUp(target, duration = 900) {
+function useCountUp(target, duration = 800) {
   const [value, setValue] = useState(0);
 
   useEffect(() => {
@@ -25,12 +26,11 @@ function useCountUp(target, duration = 900) {
 
     let frame;
     const start = performance.now();
-    const from = 0;
     const ease = (t) => 1 - Math.pow(1 - t, 3);
 
     const step = (now) => {
       const t = Math.min((now - start) / duration, 1);
-      setValue(Math.round(from + (target - from) * ease(t)));
+      setValue(Math.round(target * ease(t)));
       if (t < 1) frame = requestAnimationFrame(step);
     };
     frame = requestAnimationFrame(step);
@@ -40,8 +40,24 @@ function useCountUp(target, duration = 900) {
   return value;
 }
 
-/* The hero figure — the number that matters most, given the full
-   wordmark treatment so it reads as the headline of the screen. */
+function Chip({ active, children, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="feta-eyebrow px-3 py-2 rounded-lg flex-none whitespace-nowrap"
+      style={{
+        background: active ? FETA.amber : `${FETA.cream}1A`,
+        color: active ? FETA.ink : FETA.cream,
+        boxShadow: active
+          ? `0 0 0 2px ${FETA.gold}, 0 0 0 4px ${FETA.ink}`
+          : `0 0 0 1.5px ${FETA.cream}44`,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
 function HeadlineStat({ label, value, sub }) {
   const shown = useCountUp(value);
   return (
@@ -54,11 +70,7 @@ function HeadlineStat({ label, value, sub }) {
       </p>
       <p
         className="feta-display mt-2"
-        style={{
-          fontSize: 60,
-          lineHeight: 0.9,
-          textShadow: `3px 3px 0 ${FETA.gold}`,
-        }}
+        style={{ fontSize: 60, lineHeight: 0.9, textShadow: `3px 3px 0 ${FETA.gold}` }}
       >
         {shown.toLocaleString()}
       </p>
@@ -106,6 +118,13 @@ export default function ManagerDashboardPage() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
+  const presets = useMemo(() => buildPresets(), []);
+  const weeks = useMemo(() => weeksOfMonth(), []);
+
+  const [range, setRange] = useState(presets[0]); // Today
+  const [custom, setCustom] = useState({ from: "", to: "" });
+  const [showCustom, setShowCustom] = useState(false);
+
   const [stats, setStats] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -115,7 +134,7 @@ export default function ManagerDashboardPage() {
     let live = true;
 
     const load = () => {
-      getManagerStats(user?.region)
+      getManagerStats(user?.region, range.from, range.to)
         .then((s) => {
           if (!live) return;
           setStats(s);
@@ -126,13 +145,27 @@ export default function ManagerDashboardPage() {
         .finally(() => live && setLoading(false));
     };
 
+    setLoading(true);
     load();
     const timer = setInterval(load, REFRESH_MS);
     return () => {
       live = false;
       clearInterval(timer);
     };
-  }, [user]);
+  }, [user, range]);
+
+  const applyCustom = () => {
+    if (!custom.from && !custom.to) return;
+    const from = custom.from || custom.to;
+    const to = custom.to || custom.from;
+    setRange({
+      key: "custom",
+      label: "Custom",
+      from: from <= to ? from : to,
+      to: from <= to ? to : from,
+    });
+    setShowCustom(false);
+  };
 
   const totalWins =
     (stats?.mainPrizeWins || 0) + (stats?.regularPrizeWins || 0);
@@ -145,7 +178,7 @@ export default function ManagerDashboardPage() {
     <Screen>
       <div className="flex flex-col flex-1 px-5 pt-8 pb-10">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-5">
           <FetaMark className="w-12 flex-none" />
           <div className="min-w-0 flex-1">
             <h1
@@ -158,6 +191,90 @@ export default function ManagerDashboardPage() {
               {user?.name || user?.username} · Trade marketing
             </p>
           </div>
+        </div>
+
+        {/* Period picker */}
+        <div className="mb-5">
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+            {presets.map((p) => (
+              <Chip
+                key={p.key}
+                active={range.key === p.key}
+                onClick={() => setRange(p)}
+              >
+                {p.label}
+              </Chip>
+            ))}
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+            {weeks.map((w) => (
+              <Chip
+                key={w.key}
+                active={range.key === w.key}
+                onClick={() => setRange(w)}
+              >
+                {w.label}
+              </Chip>
+            ))}
+            <Chip
+              active={range.key === "custom"}
+              onClick={() => setShowCustom((v) => !v)}
+            >
+              Pick dates
+            </Chip>
+          </div>
+
+          {showCustom && (
+            <div
+              className="feta-lockup-flat p-4 mt-2"
+              style={{ background: FETA.cream, color: FETA.ink }}
+            >
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="feta-eyebrow block mb-1.5" style={{ color: FETA.redDeep }}>
+                    From
+                  </label>
+                  <input
+                    type="date"
+                    value={custom.from}
+                    onChange={(e) => setCustom({ ...custom, from: e.target.value })}
+                    className="feta-field !py-2 !text-sm"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="feta-eyebrow block mb-1.5" style={{ color: FETA.redDeep }}>
+                    To
+                  </label>
+                  <input
+                    type="date"
+                    value={custom.to}
+                    onChange={(e) => setCustom({ ...custom, to: e.target.value })}
+                    className="feta-field !py-2 !text-sm"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={applyCustom}
+                className="feta-press w-full mt-3 py-2.5 rounded-xl feta-display text-xs"
+                style={{
+                  background: FETA.amber,
+                  color: FETA.ink,
+                  boxShadow: `0 0 0 2px ${FETA.gold}, 0 0 0 4px ${FETA.ink}`,
+                }}
+              >
+                Show these dates
+              </button>
+            </div>
+          )}
+
+          <p
+            className="text-xs font-bold mt-2 text-center"
+            style={{ color: FETA.amber }}
+          >
+            Showing {describeRange(range.from, range.to)}
+            {loading && stats ? " · updating…" : ""}
+          </p>
         </div>
 
         {loading && !stats && (
@@ -181,7 +298,7 @@ export default function ManagerDashboardPage() {
 
         {stats && (
           <>
-            {/* Live BAs — the pulse of the division right now */}
+            {/* Live BAs — always "right now", never filtered by date */}
             <div
               className="feta-lockup px-5 py-4 mb-5 flex items-center gap-4"
               style={{ background: FETA.ink, color: FETA.cream }}
@@ -195,15 +312,13 @@ export default function ManagerDashboardPage() {
                 )}
                 <span
                   className="relative inline-flex rounded-full h-3 w-3"
-                  style={{
-                    background: stats.liveBAs > 0 ? FETA.amber : FETA.silver,
-                  }}
+                  style={{ background: stats.liveBAs > 0 ? FETA.amber : FETA.silver }}
                 />
               </span>
 
               <div className="flex-1 min-w-0">
                 <p className="feta-eyebrow" style={{ color: FETA.amber }}>
-                  Live now
+                  Live right now
                 </p>
                 <p className="feta-display text-xl mt-0.5">
                   {stats.liveBAs} of {stats.totalBAs} BAs
@@ -220,41 +335,90 @@ export default function ManagerDashboardPage() {
               )}
             </div>
 
-            {/* Reach — the headline number */}
             <HeadlineStat
               label="People reached"
               value={stats.peopleReached}
-              sub={`${stats.reachedToday.toLocaleString()} today · ${conversion}% won something`}
+              sub={`${conversion}% won something · ${(
+                stats.peopleReachedAllTime || 0
+              ).toLocaleString()} all time`}
             />
 
-            {/* Prize split */}
             <div className="mt-5">
               <SectionLabel>Prizes handed out</SectionLabel>
               <div className="grid grid-cols-2 gap-3">
                 <StatCard
                   label="Main prizes"
                   value={stats.mainPrizeWins}
-                  sub={`${stats.mainPrizeWinsToday} today`}
+                  sub={`${(stats.mainPrizeWinsAllTime || 0).toLocaleString()} all time`}
                   accent={FETA.red}
                   star
                 />
                 <StatCard
                   label="Regular prizes"
                   value={stats.regularPrizeWins}
-                  sub={`${stats.regularPrizeWinsToday} today`}
+                  sub={`${(stats.regularPrizeWinsAllTime || 0).toLocaleString()} all time`}
                   accent={FETA.redDeep}
                 />
               </div>
             </div>
 
-            {/* Coverage */}
             <div className="mt-5">
               <SectionLabel>Coverage</SectionLabel>
               <div className="grid grid-cols-2 gap-3">
-                <StatCard label="Outlets activated" value={stats.outlets} />
+                <StatCard
+                  label="Outlets activated"
+                  value={stats.outlets}
+                  sub={`${(stats.outletsAllTime || 0).toLocaleString()} all time`}
+                />
                 <StatCard label="BAs in division" value={stats.totalBAs} />
               </div>
             </div>
+
+            {/* Who did what in the selected period */}
+            {stats.baBreakdown?.length > 0 && (
+              <div className="mt-5">
+                <SectionLabel>By brand ambassador</SectionLabel>
+                <div
+                  className="feta-lockup-flat overflow-hidden"
+                  style={{ background: FETA.cream, color: FETA.ink }}
+                >
+                  {stats.baBreakdown.map((b, i) => (
+                    <div
+                      key={b.id || i}
+                      className="flex items-center gap-3 px-4 py-3"
+                      style={{
+                        borderTop: i === 0 ? "none" : `1.5px solid ${FETA.ink}12`,
+                      }}
+                    >
+                      <span
+                        className="feta-display flex-none w-6 text-center"
+                        style={{ color: `${FETA.ink}55`, fontSize: 13 }}
+                      >
+                        {i + 1}
+                      </span>
+                      <span className="font-bold text-sm flex-1 truncate">
+                        {b.name}
+                      </span>
+                      <span
+                        className="feta-eyebrow flex-none"
+                        style={{ color: FETA.redDeep }}
+                      >
+                        {b.reached} reached · {b.wins} won
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {stats.peopleReached === 0 && (
+              <p
+                className="text-xs font-semibold text-center mt-5"
+                style={{ color: `${FETA.cream}99` }}
+              >
+                No activity recorded in this period.
+              </p>
+            )}
 
             {updatedAt && (
               <p
