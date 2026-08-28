@@ -42,15 +42,22 @@ export function Sunburst({
     );
   });
 
+  /* Positioning (top/left/width/height/translate) lives on this outer
+     element and never changes. The rotation animation lives on the inner
+     svg, which fills the wrapper exactly and carries no other transform —
+     so the animation can't clobber the positioning translate the way it
+     would if both were on the same element. */
   return (
-    <svg
-      viewBox="0 0 100 100"
-      aria-hidden="true"
-      className={`${spin ? "feta-rays-turn " : ""}${className}`}
-      style={{ opacity, ...style }}
-    >
-      {lines}
-    </svg>
+    <div className={className} style={style}>
+      <svg
+        viewBox="0 0 100 100"
+        aria-hidden="true"
+        className={`w-full h-full ${spin ? "feta-rays-turn" : ""}`}
+        style={{ opacity }}
+      >
+        {lines}
+      </svg>
+    </div>
   );
 }
 
