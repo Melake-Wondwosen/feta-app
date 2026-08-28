@@ -90,7 +90,7 @@ export default function AdminPrizesPage() {
       return;
     }
 
-    setPrizes((prev) => [...prev, { name, qty: 5, active: true }]);
+    setPrizes((prev) => [...prev, { name, qty: 5, active: true, tier: "regular" }]);
     setNewName("");
     setError("");
     setDirty(true);
@@ -231,7 +231,7 @@ export default function AdminPrizesPage() {
 
                 <button
                   onClick={() => update(i, { active: !p.active })}
-                  className="feta-eyebrow ml-auto px-3 py-2 rounded-md"
+                  className="feta-eyebrow px-3 py-2 rounded-md"
                   style={{
                     background: p.active ? FETA.amber : FETA.silver,
                     color: FETA.ink,
@@ -248,6 +248,32 @@ export default function AdminPrizesPage() {
                   Delete
                 </button>
               </div>
+
+              <div className="flex items-center gap-3 mt-3">
+                <span className="feta-eyebrow" style={{ color: FETA.redDeep }}>
+                  Prize tier
+                </span>
+                <button
+                  onClick={() =>
+                    update(i, { tier: p.tier === "main" ? "regular" : "main" })
+                  }
+                  className="feta-eyebrow px-3 py-2 rounded-md ml-auto"
+                  style={{
+                    background: p.tier === "main" ? FETA.red : `${FETA.ink}22`,
+                    color: p.tier === "main" ? FETA.cream : FETA.ink,
+                  }}
+                >
+                  {p.tier === "main" ? "★ Main prize" : "Regular prize"}
+                </button>
+              </div>
+              {p.tier === "main" && (
+                <p
+                  className="text-xs font-semibold mt-2"
+                  style={{ color: FETA.redDeep }}
+                >
+                  Winners of this prize go through full name + phone registration.
+                </p>
+              )}
             </div>
           ))}
         </div>

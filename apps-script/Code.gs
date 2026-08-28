@@ -243,6 +243,7 @@ function handleGetPrizes_(e) {
     name: p.name,
     qty: Number(p.qty) || 0,
     active: String(p.active).toLowerCase() !== "false",
+    tier: p.tier === "main" ? "main" : "regular",
   }));
   return json_({ success: true, prizes: prizes });
 }
@@ -255,11 +256,11 @@ function handleSavePrizes_(payload) {
 
   const sheet = sheet_(SHEET_PRIZES);
   sheet.clear();
-  sheet.appendRow(["name", "qty", "active", "updatedAt"]);
+  sheet.appendRow(["name", "qty", "active", "tier", "updatedAt"]);
 
   const now = new Date();
   (payload.prizes || []).forEach((p) => {
-    sheet.appendRow([p.name, p.qty, p.active !== false, now]);
+    sheet.appendRow([p.name, p.qty, p.active !== false, p.tier === "main" ? "main" : "regular", now]);
   });
 
   return json_({ success: true });
@@ -326,7 +327,7 @@ function setupAllSheets() {
     "id", "outletId", "outletName", "prize", "fullName",
     "phone", "age", "gender", "date",
   ]);
-  createSheetIfMissing_(ss, SHEET_PRIZES, ["name", "qty", "active", "updatedAt"]);
+  createSheetIfMissing_(ss, SHEET_PRIZES, ["name", "qty", "active", "tier", "updatedAt"]);
   createSheetIfMissing_(ss, SHEET_SETTINGS, ["key", "value"]);
 
   seedUsersIfEmpty_();
@@ -366,16 +367,19 @@ function seedPrizesIfEmpty_() {
   const sheet = sheet_(SHEET_PRIZES);
   if (sheet.getLastRow() > 1) return;
 
+  // [name, qty, active, tier] — tier is "regular" (common, high odds) or
+  // "main" (rare, low odds, gets the full name+phone winner registration).
   const fallback = [
-    ["Keychain", 10, true],
-    ["1 Bottle", 10, true],
-    ["2 Bottles", 5, true],
-    ["T-Shirt", 5, true],
-    ["Cap", 5, true],
-    ["Bottle Opener", 10, true],
-    ["Umbrella", 3, true],
-    ["Glass", 5, true],
+    ["Keychain", 10, true, "regular"],
+    ["1 Bottle", 10, true, "regular"],
+    ["2 Bottles", 5, true, "regular"],
+    ["3 Bottles", 3, true, "regular"],
+    ["Cap", 5, true, "regular"],
+    ["Bottle Opener", 10, true, "regular"],
+    ["Umbrella", 3, true, "regular"],
+    ["Glass", 5, true, "regular"],
+    ["T-Shirt", 1, true, "main"],
   ];
   const now = new Date();
-  fallback.forEach((p) => sheet.appendRow([p[0], p[1], p[2], now]));
+  fallback.forEach((p) => sheet.appendRow([p[0], p[1], p[2], p[3], now]));
 }

@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { FETA, FetaMark, Sunburst, TibebBand } from "../brand/FetaBrand";
+import { API_URL } from "../config";
+import { getWinMessage, fillTemplate } from "../services/settingsService";
 
 /* Fit a label into at most two lines within the available width. */
 function wrapLabel(ctx, text, maxWidth) {
@@ -39,6 +41,14 @@ export default function SpinWheelPage() {
   const [hasSpun, setHasSpun] = useState(false);
   const [wheelSize, setWheelSize] = useState(300);
   const [drawError, setDrawError] = useState("");
+  const [regularWinOverlay, setRegularWinOverlay] = useState(null);
+  const [winMessage, setWinMessage] = useState(
+    "Congratulations! You've won {prize} 🎉"
+  );
+
+  useEffect(() => {
+    getWinMessage().then(setWinMessage);
+  }, []);
 
   const canvasRef = useRef(null);
   const wheelDegRef = useRef(0);
@@ -109,6 +119,7 @@ export default function SpinWheelPage() {
       slices.push({
         label: item.name,
         qty: item.qty,
+        tier: item.tier === "main" ? "main" : "regular",
         startFrac: acc,
         endFrac: acc + frac,
         midFrac: acc + frac / 2,
@@ -287,6 +298,39 @@ export default function SpinWheelPage() {
     ctx.fill();
   }
 
+  const recordRegularWin = async (result) => {
+    setCampaign((prev) => {
+      const updated = prev
+        .map((item) =>
+          item.name === result.label ? { ...item, qty: item.qty - 1 } : item
+        )
+        .filter((item) => item.qty > 0);
+      localStorage.setItem(`campaign_${id}`, JSON.stringify(updated));
+      return updated;
+    });
+
+    /* No name/phone collected for regular prizes, but the win is still
+       logged (empty fields) so daily reports and stock stay accurate. */
+    try {
+      await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "addWinner",
+          outletId: id,
+          outletName: outlet?.name,
+          prize: result.label,
+          fullName: "",
+          phone: "",
+          age: "",
+          gender: "",
+          date: new Date().toISOString(),
+        }),
+      });
+    } catch (err) {
+      console.error("Couldn't log regular win:", err);
+    }
+  };
+
   const spin = () => {
     if (spinning || campaign.length === 0) return;
     setSpinning(true);
@@ -318,11 +362,18 @@ export default function SpinWheelPage() {
       setWinner({ label: result.label, isNoWin: result.isNoWin });
 
       if (!result.isNoWin) {
-        setTimeout(() => {
-          navigate("/winner-register", {
-            state: { outlet, prize: result.label, outletId: id },
-          });
-        }, 1200);
+        if (result.tier === "main") {
+          setTimeout(() => {
+            navigate("/winner-register", {
+              state: { outlet, prize: result.label, outletId: id },
+            });
+          }, 1200);
+        } else {
+          setTimeout(() => {
+            setRegularWinOverlay(result.label);
+            recordRegularWin(result);
+          }, 900);
+        }
       }
     };
     requestAnimationFrame(animate);
@@ -562,6 +613,51 @@ export default function SpinWheelPage() {
           </button>
         </div>
       </div>
+
+      {/* Regular-prize win — a light, translucent overlay rather than the
+          full name/phone registration screen, which is reserved for the
+          rare "main" prize. Tapping through just resets for another spin. */}
+      {regularWinOverlay && (
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center px-6"
+          style={{
+            background: `${FETA.redDark}77`,
+            backdropFilter: "blur(3px)",
+            WebkitBackdropFilter: "blur(3px)",
+          }}
+        >
+          <div
+            className="feta-lockup w-full max-w-sm text-center py-9 px-6"
+            style={{ background: `${FETA.cream}F2`, color: FETA.ink }}
+          >
+            <FetaMark className="w-12 mx-auto mb-3" />
+            <p className="feta-eyebrow" style={{ color: FETA.redDeep }}>
+              🎉 Winner
+            </p>
+            <h2
+              className="feta-display text-2xl mt-2"
+              style={{ textShadow: `2px 2px 0 ${FETA.gold}` }}
+            >
+              {fillTemplate(winMessage, regularWinOverlay)}
+            </h2>
+            <button
+              onClick={() => {
+                setRegularWinOverlay(null);
+                setWinner(null);
+              }}
+              className="feta-lockup feta-press feta-display w-full mt-7"
+              style={{
+                height: 52,
+                background: FETA.amber,
+                color: FETA.ink,
+                letterSpacing: "0.08em",
+              }}
+            >
+              Spin again
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

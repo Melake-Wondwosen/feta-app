@@ -46,10 +46,13 @@ export default function CampaignSetupPage() {
     };
   }, []);
 
-  const addPrize = (prizeName, defaultQty = 1) => {
+  const addPrize = (prizeName, defaultQty = 1, tier = "regular") => {
     const existing = prizes.find((p) => p.name === prizeName);
     if (existing) return;
-    setPrizes([...prizes, { name: prizeName, qty: Number(defaultQty) || 1 }]);
+    setPrizes([
+      ...prizes,
+      { name: prizeName, qty: Number(defaultQty) || 1, tier: tier === "main" ? "main" : "regular" },
+    ]);
   };
 
   const updateQty = (index, qty) => {
@@ -145,7 +148,7 @@ export default function CampaignSetupPage() {
               return (
                 <button
                   key={prize}
-                  onClick={() => addPrize(prize, item.qty)}
+                  onClick={() => addPrize(prize, item.qty, item.tier)}
                   className="feta-press py-3 px-2 rounded-xl font-extrabold text-xs"
                   style={{
                     background: on ? FETA.amber : FETA.cream,
@@ -153,6 +156,7 @@ export default function CampaignSetupPage() {
                     boxShadow: `0 0 0 2px ${on ? FETA.red : FETA.gold}, 0 0 0 4px ${FETA.ink}`,
                   }}
                 >
+                  {item.tier === "main" ? "★ " : ""}
                   {on ? `✓ ${prize}` : prize}
                 </button>
               );
@@ -207,7 +211,10 @@ export default function CampaignSetupPage() {
                   style={{ background: FETA.cream, color: FETA.ink }}
                 >
                   <div className="flex justify-between items-center gap-3">
-                    <h4 className="feta-display text-sm truncate">{prize.name}</h4>
+                    <h4 className="feta-display text-sm truncate flex items-center gap-1.5">
+                      {prize.tier === "main" && <span>★</span>}
+                      {prize.name}
+                    </h4>
                     <button
                       onClick={() => removePrize(index)}
                       className="feta-eyebrow flex-none px-2.5 py-1.5 rounded-md"
