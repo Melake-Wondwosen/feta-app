@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import logo from "../assets/21+Logo - Habesha - Horizontal.png";
-import mandalaPattern from "../assets/pattern_background.png";
+import logo from "../assets/Feta_Logo.png";
+// TODO: replace with real Feta tibeb pattern asset
+const mandalaPattern = null;
 
 const PRIZE_ICONS = {
   "bottle": "🍺", "keychain": "🔑", "key chain": "🔑",
@@ -253,7 +254,7 @@ export default function SpinWheelPage() {
         <div
           className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: `url(${mandalaPattern})`,
+            backgroundImage: mandalaPattern ? `url(${mandalaPattern})` : 'none',
             backgroundRepeat: "repeat",
             backgroundSize: `${Math.max(280, window.innerWidth * 0.5)}px`,
           }}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { FaUser, FaLock } from "react-icons/fa";
-import logo from "../assets/21+Logo - Habesha - Vertical.png";
+import logo from "../assets/Feta_Logo.png";
 import { loginUser } from "../services/authSevice";
 
 export default function LoginPage() {

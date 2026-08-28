@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { FaPlus, FaStore, FaFileDownload } from "react-icons/fa";
 import { getOutlets } from "../services/outletService";
 import { getDeviceId } from "../services/deviceId"; // ✅ moved to top
-import logo from "../assets/21+Logo - Habesha - Vertical.png";
+import logo from "../assets/Feta_Logo.png";
 
 export default function HomePage() {
   const [outlets, setOutlets] = useState([]);

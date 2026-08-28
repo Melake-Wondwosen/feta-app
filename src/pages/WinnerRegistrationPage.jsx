@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 // Imported the assets from your Start Page
-import logo from "../assets/21+Logo - Habesha - Horizontal.png";
-import mandalaPattern from "../assets/Gemini_Generated_Image_hngu6uhngu6uhngu.png";
+import logo from "../assets/Feta_Logo.png";
+// TODO: replace with real Feta tibeb pattern asset
+const mandalaPattern = null;
 
 export default function WinnerRegistrationPage() {
   const navigate = useNavigate();
@@ -111,7 +112,7 @@ export default function WinnerRegistrationPage() {
       <div
         className="absolute inset-x-0 top-0 h-[45vh] opacity-[0.12] z-0" 
         style={{
-          backgroundImage: `url(${mandalaPattern})`,
+          backgroundImage: mandalaPattern ? `url(${mandalaPattern})` : 'none',
           backgroundRepeat: "no-repeat",
           backgroundPosition: "top center", 
           backgroundSize: "contain",

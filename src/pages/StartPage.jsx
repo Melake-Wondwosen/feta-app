@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 
-import logo from "../assets/21+Logo - Habesha - Horizontal.png";
-import mandalaPattern from "../assets/Gemini_Generated_Image_hngu6uhngu6uhngu.png";
+import logo from "../assets/Feta_Logo.png";
+// TODO: replace with real Feta tibeb pattern asset
+const mandalaPattern = null;
 
 export default function StartPage() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function StartPage() {
       <div
         className="absolute inset-0 opacity-[0.08]"
         style={{
-          backgroundImage: `url(${mandalaPattern})`,
+          backgroundImage: mandalaPattern ? `url(${mandalaPattern})` : 'none',
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
           backgroundSize: "95%",
