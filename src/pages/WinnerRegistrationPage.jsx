@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { API_URL } from "../config";
+import { getWinMessage, fillTemplate } from "../services/settingsService";
 import {
   FETA,
   FetaMark,
@@ -20,6 +21,13 @@ export default function WinnerRegistrationPage() {
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [loading, setLoading] = useState(false);
+  const [winMessage, setWinMessage] = useState(
+    "Congratulations! You've won {prize} 🎉"
+  );
+
+  useEffect(() => {
+    getWinMessage().then(setWinMessage);
+  }, []);
 
   useEffect(() => {
     const already = localStorage.getItem(`spin_done_${spinId}`);
@@ -125,7 +133,7 @@ export default function WinnerRegistrationPage() {
         <FetaMark className="w-16 mb-3 drop-shadow-[0_8px_18px_rgba(0,0,0,0.45)]" />
 
         <p className="feta-eyebrow" style={{ color: FETA.amber }}>
-          They won
+          🎉 Winner
         </p>
         <h1
           className="feta-display text-3xl mt-2"
@@ -134,7 +142,7 @@ export default function WinnerRegistrationPage() {
             textShadow: `3px 3px 0 ${FETA.ink}, 6px 6px 0 ${FETA.gold}`,
           }}
         >
-          {prize || "No prize"}
+          {fillTemplate(winMessage, prize || "a prize")}
         </h1>
         <div className="w-32 mt-4">
           <TibebBand height={16} ground={FETA.amber} line={FETA.redDeep} />

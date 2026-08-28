@@ -30,6 +30,7 @@ const SHEET_USERS = "Users";
 const SHEET_OUTLETS = "Outlets";
 const SHEET_WINNERS = "Winners";
 const SHEET_PRIZES = "Prizes";
+const SHEET_SETTINGS = "Settings";
 
 function ss_() {
   return SpreadsheetApp.getActiveSpreadsheet();
@@ -65,6 +66,7 @@ function doGet(e) {
     if (action === "login") return handleLogin_(e);
     if (action === "getOutlets") return handleGetOutlets_(e);
     if (action === "getPrizes") return handleGetPrizes_(e);
+    if (action === "getSettings") return handleGetSettings_(e);
     if (action === "generateMyDailyPDF") return handleDailyPDF_(e);
 
     return json_({ success: false, message: "Unknown action: " + action });
@@ -85,6 +87,7 @@ function doPost(e) {
     if (payload.action === "addOutlet") return handleAddOutlet_(payload);
     if (payload.action === "addWinner") return handleAddWinner_(payload);
     if (payload.action === "savePrizes") return handleSavePrizes_(payload);
+    if (payload.action === "saveSettings") return handleSaveSettings_(payload);
 
     return json_({ success: false, message: "Unknown action: " + payload.action });
   } catch (err) {
@@ -201,6 +204,38 @@ function handleAddWinner_(payload) {
   return json_({ success: true, id: id });
 }
 
+// ─── Settings (editable text, e.g. the winner congratulations message) ──
+
+function handleGetSettings_(e) {
+  const rows = rowsToObjects_(sheet_(SHEET_SETTINGS));
+  const settings = {};
+  rows.forEach((r) => (settings[r.key] = r.value));
+  return json_({ success: true, settings: settings });
+}
+
+function handleSaveSettings_(payload) {
+  const adminKey = PropertiesService.getScriptProperties().getProperty("ADMIN_KEY");
+  if (!adminKey || payload.adminKey !== adminKey) {
+    return json_({ success: false, message: "Wrong admin key." });
+  }
+
+  const sheet = sheet_(SHEET_SETTINGS);
+  const rows = rowsToObjects_(sheet);
+  const existing = {};
+  rows.forEach((r, i) => (existing[r.key] = i + 2)); // +2: header row + 1-index
+
+  Object.keys(payload.settings || {}).forEach((key) => {
+    const value = payload.settings[key];
+    if (existing[key]) {
+      sheet.getRange(existing[key], 2).setValue(value);
+    } else {
+      sheet.appendRow([key, value]);
+    }
+  });
+
+  return json_({ success: true });
+}
+
 // ─── Prizes ──────────────────────────────────────────────────────────
 
 function handleGetPrizes_(e) {
@@ -292,9 +327,11 @@ function setupAllSheets() {
     "phone", "age", "gender", "date",
   ]);
   createSheetIfMissing_(ss, SHEET_PRIZES, ["name", "qty", "active", "updatedAt"]);
+  createSheetIfMissing_(ss, SHEET_SETTINGS, ["key", "value"]);
 
   seedUsersIfEmpty_();
   seedPrizesIfEmpty_();
+  seedSettingsIfEmpty_();
 
   Logger.log("Setup complete.");
 }
@@ -316,6 +353,13 @@ function seedUsersIfEmpty_() {
 
   sheet.appendRow(["BA-001", "ba1", "B0lCMVyZfL", "Field BA", ""]);
   sheet.appendRow(["ADM-001", "admin1", "2fWlxb79Ig", "Admin", "admin"]);
+}
+
+function seedSettingsIfEmpty_() {
+  const sheet = sheet_(SHEET_SETTINGS);
+  if (sheet.getLastRow() > 1) return;
+
+  sheet.appendRow(["winMessage", "Congratulations! You've won {prize} 🎉"]);
 }
 
 function seedPrizesIfEmpty_() {
