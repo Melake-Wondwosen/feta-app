@@ -268,6 +268,15 @@ function isoDate_(value) {
   return d.toISOString().split("T")[0];
 }
 
+// ─── Sheets menu (so setup can be run with one click, no dropdown needed) ──
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu("Feta Wheel")
+    .addItem("Run setup (first time only)", "setupAllSheets")
+    .addToUi();
+}
+
 // ─── One-time setup ──────────────────────────────────────────────────
 
 function setupAllSheets() {
