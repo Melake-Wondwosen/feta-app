@@ -73,10 +73,9 @@ export default function LoginPage() {
               Username
             </label>
             <div className="relative mb-4">
-              <FaUser
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10"
-                style={{ color: FETA.red }}
-              />
+              <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
+                <FaUser style={{ color: FETA.red }} />
+              </span>
               <input
                 type="text"
                 value={username}
@@ -92,10 +91,9 @@ export default function LoginPage() {
               Password
             </label>
             <div className="relative mb-5">
-              <FaLock
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10"
-                style={{ color: FETA.red }}
-              />
+              <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
+                <FaLock style={{ color: FETA.red }} />
+              </span>
               <input
                 type="password"
                 value={password}
