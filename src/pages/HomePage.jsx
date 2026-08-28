@@ -1,10 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
-import { FaPlus, FaStore, FaFileDownload } from "react-icons/fa";
+import { FaPlus, FaStore, FaFileDownload, FaSlidersH } from "react-icons/fa";
 import { getOutlets } from "../services/outletService";
-import { getDeviceId } from "../services/deviceId"; // ✅ moved to top
-import logo from "../assets/Feta_Logo.png";
+import { getDeviceId } from "../services/deviceId";
+import { isAdmin } from "../components/AdminRoute";
+import {
+  FETA,
+  FetaMark,
+  Screen,
+  SectionLabel,
+  TibebBand,
+} from "../brand/FetaBrand";
 
 export default function HomePage() {
   const [outlets, setOutlets] = useState([]);
@@ -14,9 +21,9 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  const API_URL = "https://script.google.com/macros/s/AKfycbwWZcenN_NwVuPi6WCxt8-T4UTKp9751y_Th3YwzcVunDD_1kaaXUjdnCqGso9Wu0wsyg/exec";
+  const API_URL =
+    "https://script.google.com/macros/s/AKfycbwWZcenN_NwVuPi6WCxt8-T4UTKp9751y_Th3YwzcVunDD_1kaaXUjdnCqGso9Wu0wsyg/exec";
 
-  // ✅ Single useEffect — removed duplicate
   useEffect(() => {
     if (!user) return;
 
@@ -44,15 +51,13 @@ export default function HomePage() {
       const deviceId = getDeviceId();
       const today = new Date().toISOString().split("T")[0];
 
-      alert("Generating your daily report, please wait...");
-
       const response = await fetch(
         `${API_URL}?action=generateMyDailyPDF&deviceId=${deviceId}&date=${today}`
       );
       const result = await response.json();
 
       if (!result.success) {
-        alert("Error: " + result.message);
+        alert("Report failed: " + result.message);
         return;
       }
 
@@ -69,138 +74,218 @@ export default function HomePage() {
       const url = URL.createObjectURL(pdfBlob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `my-report-${today}.pdf`;
+      a.download = `feta-report-${today}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-
     } catch (err) {
       console.error(err);
-      alert("Failed: " + err.message);
+      alert("Report failed: " + err.message);
     } finally {
       setDownloading(false);
     }
   };
 
+  const openOutlet = (outlet) => {
+    const existingCampaign = localStorage.getItem(`campaign_${outlet.id}`);
+    if (existingCampaign) {
+      const parsed = JSON.parse(existingCampaign);
+      const hasRemainingPrizes = parsed.some((p) => p.qty > 0);
+      if (hasRemainingPrizes) {
+        navigate(`/spin/${outlet.id}`, { state: { outlet } });
+        return;
+      }
+    }
+    navigate(`/campaign/${outlet.id}`, { state: { outlet } });
+  };
+
   return (
-    <div className="min-h-screen max-w-md mx-auto bg-gradient-to-b from-black via-[#120c00] to-black text-white px-5 py-6 flex flex-col">
-
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <img src={logo} alt="Habesha Logo" className="w-16 object-contain" />
-        <div className="text-right">
-          <p className="text-gray-400 text-xs">Logged In As</p>
-          <h2 className="font-semibold text-yellow-400">{user?.username}</h2>
+    <Screen>
+      <div className="flex flex-col flex-1 px-5 pt-8 pb-8">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-7">
+          <FetaMark className="w-14 drop-shadow-[0_6px_14px_rgba(0,0,0,0.4)]" />
+          <div className="text-right">
+            <p className="feta-eyebrow" style={{ color: `${FETA.cream}99` }}>
+              Signed in as
+            </p>
+            <h2
+              className="feta-display text-lg mt-1"
+              style={{ color: FETA.amber }}
+            >
+              {user?.username}
+            </h2>
+          </div>
         </div>
-      </div>
 
-      {/* Welcome */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Welcome Back 👋</h1>
-        <p className="text-gray-400 text-sm mt-1">Ready to activate another outlet?</p>
-      </div>
-
-      {/* Section Header */}
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold">My Outlets</h3>
-      </div>
-
-      {/* ✅ Everything below is INSIDE this div */}
-      <div className="flex-1 space-y-4">
-
-        {loading && (
-          <div className="text-center text-gray-400 py-6">Loading outlets...</div>
-        )}
-
-        {!loading && outlets.length === 0 && (
-          <div className="text-center text-gray-500 py-8">No outlets assigned yet.</div>
-        )}
-
-        {outlets.map((outlet) => (
-          <div
-            key={outlet.id}
-            onClick={() => {
-              const existingCampaign = localStorage.getItem(`campaign_${outlet.id}`);
-              if (existingCampaign) {
-                const parsed = JSON.parse(existingCampaign);
-                const hasRemainingPrizes = parsed.some(p => p.qty > 0);
-                if (hasRemainingPrizes) {
-                  navigate(`/spin/${outlet.id}`, { state: { outlet } });
-                  return;
-                }
-              }
-              navigate(`/campaign/${outlet.id}`, { state: { outlet } });
-            }}
-            className="bg-white/5 border border-yellow-500/20 rounded-2xl p-4 backdrop-blur-md cursor-pointer active:scale-[0.98] transition-all"
+        {/* Greeting */}
+        <div className="mb-8">
+          <h1
+            className="feta-display text-4xl"
+            style={{ color: FETA.cream, textShadow: `3px 3px 0 ${FETA.ink}` }}
           >
-            <div className="flex items-center gap-3">
-              <div className="bg-yellow-500/10 p-3 rounded-xl">
-                <FaStore className="text-yellow-400" />
-              </div>
-              <div>
-                <h4 className="font-semibold">{outlet.name}</h4>
-                <p className="text-gray-400 text-sm">{outlet.city}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {/* Add Outlet Card */}
-        <div
-          onClick={() => navigate("/add-outlet")}
-          className="border-2 border-dashed border-yellow-500/30 rounded-2xl p-5 text-center cursor-pointer hover:border-yellow-400 transition-all"
-        >
-          <FaPlus className="mx-auto text-yellow-400 text-xl mb-2" />
-          <p className="font-semibold text-yellow-400">Add New Outlet</p>
-          <p className="text-xs text-gray-500 mt-1">Register a new outlet</p>
+            Welcome
+            <br />
+            back
+          </h1>
+          <p className="am text-lg mt-2" style={{ color: FETA.amber, fontWeight: 600 }}>
+            ከጓደኛ ጋር
+          </p>
         </div>
 
-        {/* Separator */}
-        <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-yellow-500/10 to-transparent my-6" />
+        <SectionLabel>My outlets</SectionLabel>
 
-        {/* ✅ BA Daily Report Card — now correctly INSIDE flex-1 div */}
-        <div
-          onClick={!downloading ? generateMyDailyPDF : undefined}
-          className={`
-            bg-gradient-to-r from-zinc-900 via-zinc-950 to-zinc-900
-            border border-yellow-500/10
-            rounded-2xl p-4
-            cursor-pointer
-            flex items-center justify-between
-            active:scale-[0.98] transition-all
-            ${downloading ? "opacity-60 cursor-not-allowed" : ""}
-          `}
-        >
-          <div className="flex items-center gap-3">
-            <div className="bg-yellow-500/10 p-3 rounded-xl">
-              <FaFileDownload className={`text-yellow-400 ${downloading ? "animate-bounce" : ""}`} />
+        <div className="flex-1 space-y-4">
+          {loading && (
+            <p
+              className="text-center py-6 text-sm font-semibold"
+              style={{ color: `${FETA.cream}99` }}
+            >
+              Loading outlets…
+            </p>
+          )}
+
+          {!loading && outlets.length === 0 && (
+            <div
+              className="feta-lockup-flat text-center py-7 px-5"
+              style={{ background: `${FETA.redDark}CC` }}
+            >
+              <p className="feta-display text-base" style={{ color: FETA.cream }}>
+                No outlets yet
+              </p>
+              <p className="text-sm mt-2" style={{ color: FETA.amber }}>
+                Add your first outlet to start a campaign.
+              </p>
             </div>
-            <div>
-              <h4 className="font-semibold text-sm text-zinc-100">
-                {downloading ? "Generating..." : "My Daily Report"}
-              </h4>
-              <p className="text-zinc-500 text-xs mt-0.5">Today's winners from your outlets only</p>
-            </div>
+          )}
+
+          {outlets.map((outlet) => (
+            <button
+              key={outlet.id}
+              onClick={() => openOutlet(outlet)}
+              className="feta-lockup-sm feta-press w-full text-left p-4 flex items-center gap-4"
+              style={{ background: FETA.cream, color: FETA.ink }}
+            >
+              <span
+                className="w-11 h-11 rounded-xl flex items-center justify-center flex-none"
+                style={{ background: FETA.red, color: FETA.cream }}
+              >
+                <FaStore />
+              </span>
+              <span className="min-w-0">
+                <span
+                  className="feta-display text-base block truncate"
+                  style={{ color: FETA.ink }}
+                >
+                  {outlet.name}
+                </span>
+                <span
+                  className="text-sm font-semibold block truncate"
+                  style={{ color: FETA.redDeep }}
+                >
+                  {outlet.city}
+                </span>
+              </span>
+            </button>
+          ))}
+
+          {/* Add outlet */}
+          <button
+            onClick={() => navigate("/add-outlet")}
+            className="feta-press w-full rounded-2xl p-5 text-center"
+            style={{
+              background: "transparent",
+              border: `3px dashed ${FETA.amber}`,
+              color: FETA.amber,
+            }}
+          >
+            <FaPlus className="mx-auto text-xl mb-2" />
+            <span className="feta-display text-base block">Add an outlet</span>
+            <span className="text-xs font-semibold block mt-1 opacity-80">
+              Register a new shop or bar
+            </span>
+          </button>
+
+          <div className="py-2 opacity-40">
+            <TibebBand height={16} />
           </div>
-          <span className="text-[10px] bg-yellow-950/60 text-yellow-400 border border-yellow-500/20 px-2.5 py-1 rounded-md font-bold tracking-wide">
-            PDF
-          </span>
+
+          {isAdmin(user) && (
+          <button
+            onClick={() => navigate("/admin/prizes")}
+            className="feta-lockup-sm feta-press w-full p-4 flex items-center justify-between gap-3"
+            style={{ background: FETA.amber, color: FETA.ink }}
+          >
+            <span className="flex items-center gap-4 text-left">
+              <span
+                className="w-11 h-11 rounded-xl flex items-center justify-center flex-none"
+                style={{ background: FETA.ink, color: FETA.amber }}
+              >
+                <FaSlidersH />
+              </span>
+              <span>
+                <span className="feta-display text-sm block">Wheel prizes</span>
+                <span className="text-xs font-semibold block mt-0.5" style={{ color: FETA.redDeep }}>
+                  Change what every BA sees
+                </span>
+              </span>
+            </span>
+            <span
+              className="feta-eyebrow px-2.5 py-1.5 rounded-md flex-none"
+              style={{ background: FETA.ink, color: FETA.amber }}
+            >
+              Admin
+            </span>
+          </button>
+        )}
+
+        {/* Daily report */}
+          <button
+            onClick={generateMyDailyPDF}
+            disabled={downloading}
+            className="feta-lockup-sm feta-press w-full p-4 flex items-center justify-between gap-3 disabled:opacity-50"
+            style={{ background: FETA.ink, color: FETA.cream }}
+          >
+            <span className="flex items-center gap-4 text-left">
+              <span
+                className="w-11 h-11 rounded-xl flex items-center justify-center flex-none"
+                style={{ background: FETA.amber, color: FETA.ink }}
+              >
+                <FaFileDownload className={downloading ? "animate-bounce" : ""} />
+              </span>
+              <span>
+                <span className="feta-display text-sm block" style={{ color: FETA.cream }}>
+                  {downloading ? "Building report…" : "Today's report"}
+                </span>
+                <span className="text-xs font-semibold block mt-0.5" style={{ color: FETA.amber }}>
+                  Winners from your outlets only
+                </span>
+              </span>
+            </span>
+            <span
+              className="feta-eyebrow px-2.5 py-1.5 rounded-md flex-none"
+              style={{ background: FETA.red, color: FETA.cream }}
+            >
+              PDF
+            </span>
+          </button>
         </div>
 
-      </div> {/* ✅ closes flex-1 space-y-4 */}
-
-      {/* Logout Footer */}
-      <div className="mt-8 pb-4">
+        {/* Sign out */}
         <button
           onClick={() => {
             logout();
             navigate("/login");
           }}
-          className="w-full py-3 rounded-xl border border-red-500/30 text-red-400 font-semibold bg-red-500/5 transition-colors hover:bg-red-500/10"
+          className="feta-press w-full mt-8 py-3.5 rounded-xl feta-display text-sm"
+          style={{
+            background: "transparent",
+            border: `2px solid ${FETA.cream}55`,
+            color: `${FETA.cream}CC`,
+          }}
         >
-          Logout
+          Sign out
         </button>
       </div>
-
-    </div>
+    </Screen>
   );
 }

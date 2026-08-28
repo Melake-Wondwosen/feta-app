@@ -8,12 +8,13 @@ import OutletPage from "../pages/OutletPage";
 import SpinWheelPage from "../pages/SpinWheelPage";
 import WinnerRegistrationPage from "../pages/WinnerRegistrationPage";
 import CampaignSetupPage from "../pages/CampaignSetupPage";
+import AdminPrizesPage from "../pages/AdminPrizesPage";
 import ProtectedRoute from "../components/ProtectedRoute";
+import AdminRoute from "../components/AdminRoute";
 
 export default function AppRoutes() {
   return (
     <Routes>
-
       {/* Public routes */}
       <Route path="/" element={<StartPage />} />
       <Route path="/login" element={<LoginPage />} />
@@ -73,6 +74,15 @@ export default function AppRoutes() {
         }
       />
 
+      {/* Admin only */}
+      <Route
+        path="/admin/prizes"
+        element={
+          <AdminRoute>
+            <AdminPrizesPage />
+          </AdminRoute>
+        }
+      />
     </Routes>
   );
 }
