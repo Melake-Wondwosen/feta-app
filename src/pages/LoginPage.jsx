@@ -28,7 +28,8 @@ export default function LoginPage() {
 
       if (result.success) {
         login(result.user);
-        navigate("/home");
+        const role = String(result.user?.role || "").trim().toLowerCase();
+        navigate(role === "manager" ? "/manager" : "/home");
       } else {
         setError(result.message);
       }

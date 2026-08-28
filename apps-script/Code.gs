@@ -31,6 +31,7 @@ const SHEET_OUTLETS = "Outlets";
 const SHEET_WINNERS = "Winners";
 const SHEET_PRIZES = "Prizes";
 const SHEET_SETTINGS = "Settings";
+const SHEET_SPINS = "Spins";
 
 function ss_() {
   return SpreadsheetApp.getActiveSpreadsheet();
@@ -67,6 +68,7 @@ function doGet(e) {
     if (action === "getOutlets") return handleGetOutlets_(e);
     if (action === "getPrizes") return handleGetPrizes_(e);
     if (action === "getSettings") return handleGetSettings_(e);
+    if (action === "managerStats") return handleManagerStats_(e);
     if (action === "generateMyDailyPDF") return handleDailyPDF_(e);
 
     return json_({ success: false, message: "Unknown action: " + action });
@@ -88,6 +90,8 @@ function doPost(e) {
     if (payload.action === "addWinner") return handleAddWinner_(payload);
     if (payload.action === "savePrizes") return handleSavePrizes_(payload);
     if (payload.action === "saveSettings") return handleSaveSettings_(payload);
+    if (payload.action === "logSpin") return handleLogSpin_(payload);
+    if (payload.action === "ping") return handlePing_(payload);
 
     return json_({ success: false, message: "Unknown action: " + payload.action });
   } catch (err) {
@@ -117,6 +121,7 @@ function handleLogin_(e) {
       username: match.username,
       name: match.name,
       role: match.role || "",
+      region: match.region || "",
     },
   });
 }
@@ -194,6 +199,8 @@ function handleAddWinner_(payload) {
     payload.outletId || "",
     payload.outletName || "",
     payload.prize || "",
+    payload.tier === "main" ? "main" : "regular",
+    payload.baId || "",
     payload.fullName || "",
     payload.phone || "",
     payload.age || "",
@@ -202,6 +209,43 @@ function handleAddWinner_(payload) {
   ]);
 
   return json_({ success: true, id: id });
+}
+
+/* Every spin is logged, win or not — this is what "people reached"
+   counts. Winners only tells you who won something. */
+function handleLogSpin_(payload) {
+  const sheet = sheet_(SHEET_SPINS);
+  sheet.appendRow([
+    "SPN-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
+    payload.outletId || "",
+    payload.baId || "",
+    payload.prize || "",
+    payload.outcome || "", // main | regular | none
+    payload.date || new Date().toISOString(),
+  ]);
+  return json_({ success: true });
+}
+
+/* Lightweight heartbeat so the manager dashboard can show who's live. */
+function handlePing_(payload) {
+  const sheet = sheet_(SHEET_USERS);
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0];
+  const idCol = headers.indexOf("id");
+  let seenCol = headers.indexOf("lastSeen");
+
+  if (seenCol === -1) {
+    seenCol = headers.length;
+    sheet.getRange(1, seenCol + 1).setValue("lastSeen");
+  }
+
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][idCol]) === String(payload.baId)) {
+      sheet.getRange(i + 1, seenCol + 1).setValue(new Date());
+      break;
+    }
+  }
+  return json_({ success: true });
 }
 
 // ─── Settings (editable text, e.g. the winner congratulations message) ──
@@ -266,6 +310,65 @@ function handleSavePrizes_(payload) {
   return json_({ success: true });
 }
 
+// ─── Manager dashboard stats ─────────────────────────────────────────
+
+/* Aggregates for one region. A user's region comes from the "region"
+   column on the Users sheet; BAs and their manager share the value.
+   A manager with no region set sees every region. */
+function handleManagerStats_(e) {
+  const region = String(e.parameter.region || "").trim();
+  const LIVE_WINDOW_MIN = 15;
+
+  const users = rowsToObjects_(sheet_(SHEET_USERS));
+  const inRegion = (u) =>
+    !region || String(u.region || "").trim().toLowerCase() === region.toLowerCase();
+
+  const bas = users.filter(
+    (u) => inRegion(u) && String(u.role || "").trim().toLowerCase() !== "manager"
+  );
+  const baIds = {};
+  bas.forEach((b) => (baIds[String(b.id)] = b));
+
+  const now = new Date();
+  const liveBAs = bas.filter((b) => {
+    if (!b.lastSeen) return false;
+    const seen = b.lastSeen instanceof Date ? b.lastSeen : new Date(b.lastSeen);
+    if (isNaN(seen)) return false;
+    return (now - seen) / 60000 <= LIVE_WINDOW_MIN;
+  });
+
+  const mine = (row) => !region || baIds[String(row.baId)];
+
+  const spins = rowsToObjects_(sheet_(SHEET_SPINS)).filter(mine);
+  const winners = rowsToObjects_(sheet_(SHEET_WINNERS)).filter(mine);
+  const outlets = rowsToObjects_(sheet_(SHEET_OUTLETS)).filter(
+    (o) => !region || baIds[String(o.baId)]
+  );
+
+  const today = new Date().toISOString().split("T")[0];
+  const isToday = (row) => isoDate_(row.date) === today;
+
+  const mainWins = winners.filter((w) => String(w.tier) === "main");
+  const regularWins = winners.filter((w) => String(w.tier) !== "main");
+
+  return json_({
+    success: true,
+    stats: {
+      region: region || "All regions",
+      liveBAs: liveBAs.length,
+      totalBAs: bas.length,
+      peopleReached: spins.length,
+      reachedToday: spins.filter(isToday).length,
+      mainPrizeWins: mainWins.length,
+      mainPrizeWinsToday: mainWins.filter(isToday).length,
+      regularPrizeWins: regularWins.length,
+      regularPrizeWinsToday: regularWins.filter(isToday).length,
+      outlets: outlets.length,
+      liveBAList: liveBAs.map((b) => ({ name: b.name || b.username, id: b.id })),
+    },
+  });
+}
+
 // ─── Daily PDF report ────────────────────────────────────────────────
 
 function handleDailyPDF_(e) {
@@ -318,14 +421,17 @@ function onOpen() {
 function setupAllSheets() {
   const ss = ss_();
 
-  createSheetIfMissing_(ss, SHEET_USERS, ["id", "username", "password", "name", "role"]);
+  createSheetIfMissing_(ss, SHEET_USERS, ["id", "username", "password", "name", "role", "region", "lastSeen"]);
   createSheetIfMissing_(ss, SHEET_OUTLETS, [
     "id", "baId", "deviceId", "name", "address", "city",
     "latitude", "longitude", "photoUrl", "createdAt",
   ]);
   createSheetIfMissing_(ss, SHEET_WINNERS, [
-    "id", "outletId", "outletName", "prize", "fullName",
+    "id", "outletId", "outletName", "prize", "tier", "baId", "fullName",
     "phone", "age", "gender", "date",
+  ]);
+  createSheetIfMissing_(ss, SHEET_SPINS, [
+    "id", "outletId", "baId", "prize", "outcome", "date",
   ]);
   createSheetIfMissing_(ss, SHEET_PRIZES, ["name", "qty", "active", "tier", "updatedAt"]);
   createSheetIfMissing_(ss, SHEET_SETTINGS, ["key", "value"]);

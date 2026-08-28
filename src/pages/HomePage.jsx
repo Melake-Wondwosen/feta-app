@@ -6,6 +6,7 @@ import { getOutlets } from "../services/outletService";
 import { getDeviceId } from "../services/deviceId";
 import { isAdmin } from "../components/AdminRoute";
 import { API_URL } from "../config";
+import { pingPresence } from "../services/statsService";
 import {
   FETA,
   FetaMark,
@@ -29,6 +30,15 @@ export default function HomePage() {
     if (cached) setOutlets(JSON.parse(cached));
 
     loadOutlets();
+  }, [user]);
+
+  /* Presence heartbeat — drives the "live BAs" figure on the regional
+     manager dashboard. Fire-and-forget, never blocks the UI. */
+  useEffect(() => {
+    if (!user?.id) return;
+    pingPresence(user.id);
+    const timer = setInterval(() => pingPresence(user.id), 5 * 60 * 1000);
+    return () => clearInterval(timer);
   }, [user]);
 
   async function loadOutlets() {

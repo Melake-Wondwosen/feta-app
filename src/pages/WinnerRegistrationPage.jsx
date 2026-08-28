@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { API_URL } from "../config";
 import { getWinMessage, fillTemplate } from "../services/settingsService";
+import { useAuth } from "../context/AuthContext";
 import {
   FETA,
   FetaMark,
@@ -15,6 +16,7 @@ export default function WinnerRegistrationPage() {
   const location = useLocation();
 
   const { outlet, prize, outletId, spinId } = location.state || {};
+  const { user } = useAuth();
 
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -51,6 +53,8 @@ export default function WinnerRegistrationPage() {
         outletId,
         outletName: outlet?.name,
         prize,
+        tier: "main",
+        baId: user?.id,
         fullName,
         phone,
         age,

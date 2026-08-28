@@ -11,6 +11,8 @@ import CampaignSetupPage from "../pages/CampaignSetupPage";
 import AdminPrizesPage from "../pages/AdminPrizesPage";
 import ProtectedRoute from "../components/ProtectedRoute";
 import AdminRoute from "../components/AdminRoute";
+import ManagerRoute from "../components/ManagerRoute";
+import ManagerDashboardPage from "../pages/ManagerDashboardPage";
 
 export default function AppRoutes() {
   return (
@@ -75,6 +77,15 @@ export default function AppRoutes() {
       />
 
       {/* Admin only */}
+      <Route
+        path="/manager"
+        element={
+          <ManagerRoute>
+            <ManagerDashboardPage />
+          </ManagerRoute>
+        }
+      />
+
       <Route
         path="/admin/prizes"
         element={

@@ -3,6 +3,8 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { FETA, FetaMark, Sunburst, TibebBand } from "../brand/FetaBrand";
 import { API_URL } from "../config";
 import { getWinMessage, fillTemplate } from "../services/settingsService";
+import { logSpin } from "../services/statsService";
+import { useAuth } from "../context/AuthContext";
 
 /* Fit a label into at most two lines within the available width. */
 function wrapLabel(ctx, text, maxWidth) {
@@ -34,6 +36,7 @@ export default function SpinWheelPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const outlet = location.state?.outlet;
+  const { user } = useAuth();
 
   const [campaign, setCampaign] = useState([]);
   const [spinning, setSpinning] = useState(false);
@@ -397,6 +400,8 @@ export default function SpinWheelPage() {
           outletId: id,
           outletName: outlet?.name,
           prize: result.label,
+          tier: "regular",
+          baId: user?.id,
           fullName: "",
           phone: "",
           age: "",
@@ -448,6 +453,14 @@ export default function SpinWheelPage() {
       const result = readPointer(slices, finalDeg);
       setSpinning(false);
       setWinner({ label: result.label, isNoWin: result.isNoWin });
+
+      /* Every spin counts toward reach, win or not. */
+      logSpin({
+        outletId: id,
+        baId: user?.id,
+        prize: result.isNoWin ? "" : result.label,
+        outcome: result.isNoWin ? "none" : result.tier,
+      });
 
       if (result.isNoWin) {
         playNoWinTone();
