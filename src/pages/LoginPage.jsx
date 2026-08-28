@@ -69,31 +69,33 @@ export default function LoginPage() {
             </div>
 
             {/* Username */}
-            <label className="feta-eyebrow block mb-2" style={{ color: FETA.redDeep }}>
+            <label
+              className="feta-eyebrow flex items-center gap-2 mb-2"
+              style={{ color: FETA.redDeep }}
+            >
+              <FaUser aria-hidden="true" />
               Username
             </label>
-            <div className="relative mb-4">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
-                <FaUser style={{ color: FETA.red }} />
-              </span>
+            <div className="mb-4">
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Your username"
                 autoComplete="username"
-                className="feta-field pl-12"
+                className="feta-field"
               />
             </div>
 
             {/* Password */}
-            <label className="feta-eyebrow block mb-2" style={{ color: FETA.redDeep }}>
+            <label
+              className="feta-eyebrow flex items-center gap-2 mb-2"
+              style={{ color: FETA.redDeep }}
+            >
+              <FaLock aria-hidden="true" />
               Password
             </label>
-            <div className="relative mb-5">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
-                <FaLock style={{ color: FETA.red }} />
-              </span>
+            <div className="mb-5">
               <input
                 type="password"
                 value={password}
@@ -101,7 +103,7 @@ export default function LoginPage() {
                 placeholder="Your password"
                 autoComplete="current-password"
                 onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                className="feta-field pl-12"
+                className="feta-field"
               />
             </div>
 
