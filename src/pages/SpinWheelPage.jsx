@@ -106,6 +106,26 @@ export default function SpinWheelPage() {
     osc.stop(ctx.currentTime + 0.05);
   }
 
+  /* Glass clink — two close, bright partials with a fast decay, which
+     is what reads as bottles touching rather than a bell. */
+  function playClink() {
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    [2340, 3150, 4600].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.value = freq;
+      const start = ctx.currentTime + i * 0.006;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.14 / (i + 1), start + 0.004);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.42);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.45);
+    });
+  }
+
   function playWinChime() {
     const ctx = ensureAudio();
     if (!ctx) return;
@@ -570,6 +590,12 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
           setTimeout(() => {
             setRegularWinOverlay(result.label);
             recordRegularWin(result);
+
+            /* The bottles meet at 55% of a 0.9s swing, so the clink
+               lands with the visual contact rather than the reveal. */
+            if (bottleCost(result.label) > 1) {
+              setTimeout(playClink, 495);
+            }
           }, 900);
         }
       }
@@ -814,29 +840,66 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
             style={{ background: `${FETA.cream}F2`, color: FETA.ink }}
           >
             {bottleCost(regularWinOverlay) > 0 ? (
-              /* Beer wins show the real bottles — one per bottle won —
-                 rising into place in sequence. */
-              <div className="relative flex items-end justify-center gap-2 mb-4 h-28">
+              /* Beer wins show the real bottles, sized to break out past
+                 the top of the card. Two or three clink together. */
+              <div
+                className="relative flex items-end justify-center -mt-24 mb-3"
+                style={{ height: 190 }}
+              >
                 <span
                   aria-hidden="true"
-                  className="feta-bottle-glow absolute inset-0 m-auto rounded-full"
+                  className="feta-bottle-glow absolute left-1/2 top-1/2 rounded-full pointer-events-none"
                   style={{
-                    width: 130,
-                    height: 130,
-                    background: `radial-gradient(circle, ${FETA.amber}CC 0%, ${FETA.gold}55 45%, transparent 70%)`,
+                    width: 240,
+                    height: 240,
+                    marginLeft: -120,
+                    marginTop: -120,
+                    background: `radial-gradient(circle, ${FETA.amber}DD 0%, ${FETA.gold}66 42%, transparent 70%)`,
                   }}
                 />
-                {Array.from({ length: bottleCost(regularWinOverlay) }).map(
-                  (_, i) => (
+
+                {(() => {
+                  const n = bottleCost(regularWinOverlay);
+                  const cls =
+                    n === 1
+                      ? ["feta-bottle-solo"]
+                      : n === 2
+                      ? ["feta-cheers-left", "feta-cheers-right"]
+                      : [
+                          "feta-cheers-left",
+                          "feta-cheers-centre",
+                          "feta-cheers-right",
+                        ];
+
+                  return cls.map((c, i) => (
                     <img
                       key={i}
                       src={fetaBottle}
                       alt=""
                       aria-hidden="true"
-                      className="feta-bottle-pop relative h-28 w-auto drop-shadow-[0_6px_10px_rgba(23,17,15,0.45)]"
-                      style={{ animationDelay: `${i * 0.16}s, ${0.8 + i * 0.16}s` }}
+                      className={`${c} relative w-auto drop-shadow-[0_10px_18px_rgba(23,17,15,0.5)]`}
+                      style={{
+                        height: n === 1 ? 180 : 168,
+                        marginLeft: i === 0 ? 0 : n === 3 ? -22 : -14,
+                        zIndex: c === "feta-cheers-centre" ? 1 : 2,
+                      }}
                     />
-                  )
+                  ));
+                })()}
+
+                {bottleCost(regularWinOverlay) > 1 && (
+                  <span
+                    aria-hidden="true"
+                    className="feta-clink-spark absolute left-1/2 rounded-full pointer-events-none"
+                    style={{
+                      top: 14,
+                      width: 90,
+                      height: 90,
+                      marginLeft: -45,
+                      zIndex: 3,
+                      background: `radial-gradient(circle, #FFFFFF 0%, ${FETA.amber}AA 35%, transparent 68%)`,
+                    }}
+                  />
                 )}
               </div>
             ) : (

@@ -403,25 +403,129 @@ select.feta-field {
 }
 
 /* ------------------------------------------------------------
-   Win celebration: bottles rise into place one after another,
-   overshooting slightly then settling, with a gold glow that
-   pulses out behind them.
+   Win celebration.
+
+   A single bottle rises and settles. Two or three tilt toward
+   each other, clink at the top of the arc, then rock apart —
+   the gesture people actually make when they toast.
    ------------------------------------------------------------ */
-@keyframes feta-bottle-in {
+
+/* One bottle: rise, overshoot, settle, then breathe. */
+@keyframes feta-bottle-solo {
   0% {
     opacity: 0;
-    transform: translateY(38px) scale(0.72) rotate(-12deg);
+    transform: translateY(70px) scale(0.6) rotate(-14deg);
   }
   55% {
     opacity: 1;
-    transform: translateY(-8px) scale(1.08) rotate(3deg);
+    transform: translateY(-14px) scale(1.1) rotate(4deg);
   }
-  75% {
-    transform: translateY(2px) scale(0.98) rotate(-1deg);
+  78% {
+    transform: translateY(4px) scale(0.97) rotate(-2deg);
   }
   100% {
     opacity: 1;
     transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
+@keyframes feta-bottle-breathe {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(2deg);
+  }
+}
+
+/* Cheers: swing in from the outside, meet in the middle, recoil
+   from the impact, then rock gently. Mirrored for each side. */
+@keyframes feta-cheers-left {
+  0% {
+    opacity: 0;
+    transform: translate(-90px, 60px) rotate(-38deg) scale(0.7);
+  }
+  45% {
+    opacity: 1;
+    transform: translate(10px, -6px) rotate(16deg) scale(1.06);
+  }
+  /* the clink */
+  55% {
+    transform: translate(14px, -8px) rotate(21deg) scale(1.08);
+  }
+  68% {
+    transform: translate(-6px, 2px) rotate(6deg) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(11deg) scale(1);
+  }
+}
+@keyframes feta-cheers-right {
+  0% {
+    opacity: 0;
+    transform: translate(90px, 60px) rotate(38deg) scale(0.7);
+  }
+  45% {
+    opacity: 1;
+    transform: translate(-10px, -6px) rotate(-16deg) scale(1.06);
+  }
+  55% {
+    transform: translate(-14px, -8px) rotate(-21deg) scale(1.08);
+  }
+  68% {
+    transform: translate(6px, 2px) rotate(-6deg) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(-11deg) scale(1);
+  }
+}
+/* The middle bottle of three stays upright and takes the hit. */
+@keyframes feta-cheers-centre {
+  0% {
+    opacity: 0;
+    transform: translateY(70px) scale(0.7);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.06);
+  }
+  55% {
+    transform: translateY(-13px) scale(1.08);
+  }
+  70% {
+    transform: translateY(3px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes feta-cheers-rock {
+  0%,
+  100% {
+    transform: rotate(var(--rest, 0deg)) translateY(0);
+  }
+  50% {
+    transform: rotate(calc(var(--rest, 0deg) * 0.55)) translateY(-5px);
+  }
+}
+
+/* The impact flash at the point of contact. */
+@keyframes feta-clink-spark {
+  0%,
+  44% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  56% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.1);
   }
 }
 
@@ -431,37 +535,49 @@ select.feta-field {
     transform: scale(0.4);
   }
   40% {
-    opacity: 0.85;
+    opacity: 0.9;
   }
   100% {
     opacity: 0;
-    transform: scale(1.9);
+    transform: scale(2);
   }
 }
 
-/* A slow sway once settled, so the group doesn't feel frozen. */
-@keyframes feta-bottle-sway {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-4px) rotate(1.5deg);
-  }
-}
-
-.feta-bottle-pop {
+.feta-bottle-solo {
   animation:
-    feta-bottle-in 0.62s cubic-bezier(0.34, 1.56, 0.64, 1) backwards,
-    feta-bottle-sway 3.2s ease-in-out 0.8s infinite;
+    feta-bottle-solo 0.68s cubic-bezier(0.34, 1.56, 0.64, 1) backwards,
+    feta-bottle-breathe 3.4s ease-in-out 0.9s infinite;
 }
-
+.feta-cheers-left {
+  --rest: 11deg;
+  animation:
+    feta-cheers-left 0.9s cubic-bezier(0.3, 1.3, 0.5, 1) backwards,
+    feta-cheers-rock 3s ease-in-out 1.1s infinite;
+}
+.feta-cheers-right {
+  --rest: -11deg;
+  animation:
+    feta-cheers-right 0.9s cubic-bezier(0.3, 1.3, 0.5, 1) backwards,
+    feta-cheers-rock 3s ease-in-out 1.1s infinite;
+}
+.feta-cheers-centre {
+  animation:
+    feta-cheers-centre 0.9s cubic-bezier(0.3, 1.3, 0.5, 1) backwards,
+    feta-bottle-breathe 3s ease-in-out 1.1s infinite;
+}
+.feta-clink-spark {
+  animation: feta-clink-spark 1s ease-out backwards;
+}
 .feta-bottle-glow {
-  animation: feta-bottle-glow 1.1s ease-out backwards;
+  animation: feta-bottle-glow 1.2s ease-out backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .feta-bottle-pop,
+  .feta-bottle-solo,
+  .feta-cheers-left,
+  .feta-cheers-right,
+  .feta-cheers-centre,
+  .feta-clink-spark,
   .feta-bottle-glow {
     animation: none !important;
   }
