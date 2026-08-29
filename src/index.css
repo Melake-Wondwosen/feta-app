@@ -296,89 +296,106 @@ select.feta-field {
     0 0 0 3px var(--feta-amber);
 }
 
-/* ---------- SOFT GLASS ----------
-   Restraint over spectacle: near-flat surfaces, generous
-   rounding, one very soft diffused shadow, and a hairline
-   edge. The red ground stays; panels are a pale wash over it
-   rather than heavy tinted glass, and amber is used sparingly
-   as the single accent. */
-[data-theme="glass"] {
-  --soft-surface: rgba(255, 244, 228, 0.92);
-  --soft-line: rgba(23, 17, 15, 0.06);
-}
+/* ---------- SMOKED GLASS ----------
+   Genuinely translucent panels over the red ground. The red
+   reads through every surface, so the app stays Feta rather
+   than turning into a generic light UI.
 
+   Elegance here comes from softness, not opacity: one wide
+   diffused shadow, a bright hairline along the lit edge, deep
+   rounding, and no competing gradients.
+   ------------------------------------------------------------ */
 [data-theme="glass"] .feta-lockup,
 [data-theme="glass"] .feta-lockup-sm,
 [data-theme="glass"] .feta-lockup-flat {
   border-radius: 26px;
-  background: var(--soft-surface) !important;
-  backdrop-filter: blur(24px) saturate(140%);
-  -webkit-backdrop-filter: blur(24px) saturate(140%);
-  border: 1px solid var(--soft-line);
-  /* One wide, low-opacity shadow reads as depth; stacked hard
-     shadows read as clutter. */
+  /* Low enough that the ground genuinely shows through. */
+  background: rgba(255, 244, 228, 0.11) !important;
+  backdrop-filter: blur(30px) saturate(135%);
+  -webkit-backdrop-filter: blur(30px) saturate(135%);
+  border: 1px solid rgba(255, 244, 228, 0.14);
+  /* Light falls from above: the top edge catches, the rest fades. */
+  border-top-color: rgba(255, 244, 228, 0.38);
   box-shadow:
-    0 1px 2px rgba(23, 17, 15, 0.04),
-    0 12px 32px -8px rgba(23, 17, 15, 0.16);
-  color: var(--feta-ink);
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 16px 40px -12px rgba(23, 17, 15, 0.5);
+  color: var(--feta-cream);
 }
 
-/* Text keeps its own colour — no blanket override, so amber
-   and red accents survive. */
+/* Anything that was ink-on-cream has to invert to stay legible on
+   frost. Amber, gold and red accents are left alone, so the palette
+   survives instead of flattening to one colour. */
+[data-theme="glass"] .feta-lockup [style*="rgb(23, 17, 15)"],
+[data-theme="glass"] .feta-lockup-sm [style*="rgb(23, 17, 15)"],
+[data-theme="glass"] .feta-lockup-flat [style*="rgb(23, 17, 15)"],
 [data-theme="glass"] .feta-lockup,
 [data-theme="glass"] .feta-lockup-sm,
 [data-theme="glass"] .feta-lockup-flat {
+  color: var(--feta-cream) !important;
+}
+[data-theme="glass"] .feta-lockup .feta-display,
+[data-theme="glass"] .feta-lockup-sm .feta-display,
+[data-theme="glass"] .feta-lockup-flat .feta-display {
+  text-shadow: 0 1px 8px rgba(23, 17, 15, 0.45);
+}
+
+/* Amber buttons stay amber — they're the one solid accent. */
+[data-theme="glass"] .feta-lockup[style*="rgb(251, 177, 92)"],
+[data-theme="glass"] .feta-lockup-sm[style*="rgb(251, 177, 92)"] {
+  background: rgba(251, 177, 92, 0.85) !important;
+  border-color: rgba(255, 244, 228, 0.45);
+  color: var(--feta-ink) !important;
+}
+[data-theme="glass"] .feta-lockup[style*="rgb(251, 177, 92)"] * {
+  color: var(--feta-ink) !important;
   text-shadow: none;
 }
 
 [data-theme="glass"] .feta-press:active:not(:disabled),
 [data-theme="glass"] .feta-lockup-sm.feta-press:active:not(:disabled) {
   transform: scale(0.985);
-  background: rgba(255, 244, 228, 0.98) !important;
+  background: rgba(255, 244, 228, 0.2) !important;
   box-shadow:
-    0 1px 2px rgba(23, 17, 15, 0.05),
-    0 4px 12px -4px rgba(23, 17, 15, 0.14);
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 6px 18px -8px rgba(23, 17, 15, 0.45);
 }
 
-/* Inputs sit *into* the surface — a faint inset, no heavy fill. */
+/* Inputs are darker than their panel, so they read as recessed. */
 [data-theme="glass"] .feta-field {
   border-radius: 16px;
-  background: rgba(23, 17, 15, 0.035) !important;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: 1px solid rgba(23, 17, 15, 0.08);
+  background: rgba(23, 17, 15, 0.26) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 244, 228, 0.16);
   box-shadow: none;
-  color: var(--feta-ink) !important;
+  color: var(--feta-cream) !important;
 }
 [data-theme="glass"] .feta-field::placeholder {
-  color: rgba(23, 17, 15, 0.35);
+  color: rgba(255, 244, 228, 0.42);
 }
 [data-theme="glass"] .feta-field:focus-visible {
-  background: rgba(23, 17, 15, 0.02) !important;
-  border-color: var(--feta-amber);
-  box-shadow: 0 0 0 3px rgba(251, 177, 92, 0.25);
+  border-color: rgba(251, 177, 92, 0.7);
+  box-shadow: 0 0 0 3px rgba(251, 177, 92, 0.22);
 }
 [data-theme="glass"] select.feta-field {
   background-image:
-    linear-gradient(45deg, transparent 50%, var(--feta-red) 50%),
-    linear-gradient(135deg, var(--feta-red) 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, var(--feta-amber) 50%),
+    linear-gradient(135deg, var(--feta-amber) 50%, transparent 50%);
 }
 
-/* Pills and chips lose their hard keylines in this theme. */
+/* The sunburst is the whole point here — it's what you see through
+   the glass — but it has to be quiet enough not to fight the text. */
+[data-theme="glass"] .feta-rays-turn {
+  opacity: 0.5;
+}
 [data-theme="glass"] .feta-eyebrow {
   letter-spacing: 0.14em;
 }
-
-/* A quieter ground so the soft panels have room to breathe —
-   the busy sunburst fights the restraint this theme is after. */
-[data-theme="glass"] .feta-rays-turn {
-  opacity: 0.35;
-}
 [data-theme="glass"] .feta-scroll {
-  scrollbar-color: rgba(23, 17, 15, 0.18) transparent;
+  scrollbar-color: rgba(255, 244, 228, 0.3) transparent;
 }
 [data-theme="glass"] .feta-scroll::-webkit-scrollbar-thumb {
-  background: rgba(23, 17, 15, 0.18);
+  background: rgba(255, 244, 228, 0.3);
 }
 
 /* ------------------------------------------------------------

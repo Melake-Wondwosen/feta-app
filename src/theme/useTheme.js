@@ -15,7 +15,7 @@ export const THEMES = [
   {
     key: "glass",
     name: "Smoked glass",
-    blurb: "Tinted frosted panels with a gold thread",
+    blurb: "Translucent panels, the sunburst showing through",
   },
 ];
 
