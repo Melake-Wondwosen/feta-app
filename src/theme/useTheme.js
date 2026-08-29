@@ -15,7 +15,7 @@ export const THEMES = [
   {
     key: "neu",
     name: "Soft relief",
-    blurb: "Warm cream surfaces pressed in and out of the page",
+    blurb: "Feta red pressed in and out of the page",
   },
   {
     key: "glass",

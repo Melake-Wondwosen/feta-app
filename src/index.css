@@ -608,9 +608,12 @@ select.feta-field {
    Feta red as the single accent.
    ------------------------------------------------------------ */
 [data-theme="neu"] {
-  --neu-bg: #ece2d5;
-  --neu-light: #fdf7ee;
-  --neu-dark: #c7b8a5;
+  /* A flat Feta red ground. The highlight is that red lifted toward
+     the light, the shadow is it pushed toward red-dark — so relief
+     reads as the brand colour catching light, not as grey plastic. */
+  --neu-bg: #a81f28;
+  --neu-light: #c9333d;
+  --neu-dark: #6d1016;
 }
 
 /* data-theme sits on <html>, so this reaches <body> directly. */
@@ -647,11 +650,15 @@ select.feta-field {
     7px 7px 16px var(--neu-dark);
   text-shadow: none !important;
 }
-/* Only cream text needs inverting; red, amber and ink stay as set. */
-[data-theme="neu"] .feta-lockup [style*="rgb(255, 244, 228)"],
-[data-theme="neu"] .feta-lockup-sm [style*="rgb(255, 244, 228)"],
-[data-theme="neu"] .feta-lockup-flat [style*="rgb(255, 244, 228)"] {
-  color: var(--feta-ink) !important;
+/* Panels are the same red as the ground, so anything that was ink
+   (it used to sit on a cream card) has to become cream. */
+[data-theme="neu"] .feta-lockup,
+[data-theme="neu"] .feta-lockup-sm,
+[data-theme="neu"] .feta-lockup-flat,
+[data-theme="neu"] .feta-lockup [style*="rgb(23, 17, 15)"],
+[data-theme="neu"] .feta-lockup-sm [style*="rgb(23, 17, 15)"],
+[data-theme="neu"] .feta-lockup-flat [style*="rgb(23, 17, 15)"] {
+  color: var(--feta-cream) !important;
 }
 
 /* Pressing pushes the surface into the page: the same two
@@ -673,38 +680,34 @@ select.feta-field {
   box-shadow:
     inset -4px -4px 10px var(--neu-light),
     inset 5px 5px 12px var(--neu-dark);
-  color: var(--feta-ink) !important;
+  color: var(--feta-cream) !important;
 }
 [data-theme="neu"] .feta-field::placeholder {
-  color: rgba(23, 17, 15, 0.35);
+  color: rgba(255, 244, 228, 0.45);
 }
 [data-theme="neu"] .feta-field:focus-visible {
   box-shadow:
     inset -4px -4px 10px var(--neu-light),
     inset 5px 5px 12px var(--neu-dark),
-    0 0 0 2px var(--feta-red);
+    0 0 0 2px var(--feta-amber);
 }
 [data-theme="neu"] select.feta-field {
   background-image:
-    linear-gradient(45deg, transparent 50%, var(--feta-red) 50%),
-    linear-gradient(135deg, var(--feta-red) 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, var(--feta-amber) 50%),
+    linear-gradient(135deg, var(--feta-amber) 50%, transparent 50%);
 }
 
 /* Red is the accent and it belongs on the brand furniture. */
+/* Amber is the accent here — red on red would disappear. */
 [data-theme="neu"] .feta-eyebrow {
-  color: var(--feta-red) !important;
+  color: var(--feta-amber) !important;
   letter-spacing: 0.16em;
 }
 
-/* Section labels and body copy sat on a red ground before, so they
-   were cream — unreadable now the ground is cream. Bring them back
-   to ink and red. */
-[data-theme="neu"] .feta-screen [style*="rgb(255, 244, 228)"] {
-  color: var(--feta-ink) !important;
-}
+/* Cream type on a red ground, as everywhere else in the app. */
 [data-theme="neu"] .feta-screen h1,
 [data-theme="neu"] .feta-screen h2 {
-  color: var(--feta-red) !important;
+  color: var(--feta-cream) !important;
   text-shadow: none !important;
 }
 
@@ -713,8 +716,8 @@ select.feta-field {
    They become red tiles with cream glyphs: on-brand and legible. */
 [data-theme="neu"] .feta-screen span[class*="rounded-xl"][style*="rgb(23, 17, 15)"],
 [data-theme="neu"] .feta-screen span[class*="rounded-2xl"][style*="rgb(23, 17, 15)"] {
-  background: var(--feta-red) !important;
-  color: var(--feta-cream) !important;
+  background: var(--neu-bg) !important;
+  color: var(--feta-amber) !important;
   box-shadow:
     -3px -3px 8px var(--neu-light),
     4px 4px 10px var(--neu-dark);
@@ -727,12 +730,12 @@ select.feta-field {
 }
 [data-theme="neu"] .feta-lockup[style*="rgb(251, 177, 92)"] .feta-display,
 [data-theme="neu"] .feta-lockup-sm[style*="rgb(251, 177, 92)"] .feta-display {
-  color: var(--feta-red) !important;
+  color: var(--feta-amber) !important;
 }
 
 [data-theme="neu"] .feta-scroll {
-  scrollbar-color: var(--neu-dark) transparent;
+  scrollbar-color: rgba(255, 244, 228, 0.35) transparent;
 }
 [data-theme="neu"] .feta-scroll::-webkit-scrollbar-thumb {
-  background: var(--neu-dark);
+  background: rgba(255, 244, 228, 0.35);
 }
