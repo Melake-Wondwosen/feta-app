@@ -159,7 +159,7 @@ export default function CampaignSetupPage() {
       </div>
 
       {/* Scrolling body */}
-      <div className="relative z-10 flex-1 overflow-y-auto px-6 pb-4 space-y-6">
+      <div className="feta-scroll relative z-10 flex-1 overflow-y-auto px-6 pb-4 space-y-6">
         {/* Standard prizes */}
         <div>
           <SectionLabel>Trade materials</SectionLabel>

@@ -170,7 +170,7 @@ export default function WinnerRegistrationPage() {
       </div>
 
       {/* Form */}
-      <div className="relative z-10 flex-1 overflow-y-auto px-6 py-5 space-y-4">
+      <div className="feta-scroll relative z-10 flex-1 overflow-y-auto px-6 py-5 space-y-4">
         {field(
           "Full name",
           <input

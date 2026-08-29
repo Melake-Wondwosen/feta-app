@@ -133,8 +133,17 @@ export default function HomePage() {
               outlets a BA has registered. */}
           {!isAdmin(user) && outlets.length > 0 && (
           <div
-            className="overflow-y-auto space-y-4 -mx-2 px-2 py-1"
-            style={{ maxHeight: "23rem", overscrollBehavior: "contain" }}
+            className="feta-scroll overflow-y-auto space-y-4 -mx-2 px-2 py-1"
+            style={{
+              maxHeight: "23rem",
+              overscrollBehavior: "contain",
+              /* Softens the card that's cut off at the bottom edge, so the
+                 list fades out rather than looking chopped. */
+              maskImage:
+                "linear-gradient(to bottom, #000 0, #000 calc(100% - 28px), transparent 100%)",
+              WebkitMaskImage:
+                "linear-gradient(to bottom, #000 0, #000 calc(100% - 28px), transparent 100%)",
+            }}
           >
           {outlets.map((outlet) => (
             <button

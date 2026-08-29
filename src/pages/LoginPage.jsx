@@ -42,7 +42,7 @@ export default function LoginPage() {
 
   return (
     <Screen>
-      <div className="flex-1 overflow-y-auto flex flex-col">
+      <div className="feta-scroll flex-1 overflow-y-auto flex flex-col">
         <div className="m-auto w-full px-6 py-10">
           {/* Header */}
           <div className="text-center mb-7">
