@@ -28,8 +28,8 @@ function prizeImage(name) {
   if (isBottlePrize(name)) return fetaBottle;
   if (/t[\s-]?shirt/i.test(name)) return fetaTshirt;
   if (/\bcap\b/i.test(name)) return fetaCap;
-  if (/opener/i.test(name)) return fetaOpener;
-  if (/key\s*-?\s*chain|keyring/i.test(name)) return fetaKeychain;
+  if (/opener/i.test(name)) return fetaKeychain;
+  if (/key\s*-?\s*chain|keyring/i.test(name)) return fetaOpener;
   return null;
 }
 import {

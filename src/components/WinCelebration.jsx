@@ -20,8 +20,8 @@ const MERCH = [
   { test: /\bcap\b/i, src: fetaCap, height: 150 },
   /* Same physical product, two faces: the logo side for the keychain,
      the opener cutout for the bottle opener. */
-  { test: /bottle\s*opener|opener/i, src: fetaOpener, height: 165 },
-  { test: /key\s*-?\s*chain|keyring/i, src: fetaKeychain, height: 175 },
+  { test: /bottle\s*opener|opener/i, src: fetaKeychain, height: 175 },
+  { test: /key\s*-?\s*chain|keyring/i, src: fetaOpener, height: 165 },
 ];
 
 export default function WinCelebration({ prize }) {
