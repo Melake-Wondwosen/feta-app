@@ -628,8 +628,10 @@ select.feta-field {
 [data-theme="neu"] .feta-rays-turn {
   opacity: 0.06;
 }
+/* The woven trims stay — they're the strongest red cue on an
+   otherwise quiet ground. */
 [data-theme="neu"] .feta-screen > .absolute svg {
-  opacity: 0.25;
+  opacity: 0.9;
 }
 
 /* Raised: lit from the top left, shadowed to the bottom right.
@@ -643,8 +645,13 @@ select.feta-field {
   box-shadow:
     -6px -6px 14px var(--neu-light),
     7px 7px 16px var(--neu-dark);
-  color: var(--feta-ink) !important;
   text-shadow: none !important;
+}
+/* Only cream text needs inverting; red, amber and ink stay as set. */
+[data-theme="neu"] .feta-lockup [style*="rgb(255, 244, 228)"],
+[data-theme="neu"] .feta-lockup-sm [style*="rgb(255, 244, 228)"],
+[data-theme="neu"] .feta-lockup-flat [style*="rgb(255, 244, 228)"] {
+  color: var(--feta-ink) !important;
 }
 
 /* Pressing pushes the surface into the page: the same two
@@ -683,20 +690,43 @@ select.feta-field {
     linear-gradient(135deg, var(--feta-red) 50%, transparent 50%);
 }
 
-/* Red is the one accent, used on type rather than as fill. */
+/* Red is the accent and it belongs on the brand furniture. */
 [data-theme="neu"] .feta-eyebrow {
   color: var(--feta-red) !important;
   letter-spacing: 0.16em;
 }
-[data-theme="neu"] .feta-display {
+
+/* Section labels and body copy sat on a red ground before, so they
+   were cream — unreadable now the ground is cream. Bring them back
+   to ink and red. */
+[data-theme="neu"] .feta-screen [style*="rgb(255, 244, 228)"] {
   color: var(--feta-ink) !important;
 }
-/* Amber call-to-action surfaces keep a tint, but still in relief. */
+[data-theme="neu"] .feta-screen h1,
+[data-theme="neu"] .feta-screen h2 {
+  color: var(--feta-red) !important;
+  text-shadow: none !important;
+}
+
+/* Icon chips were solid ink squares — heavy on a soft cream ground,
+   and the glyph inside was being forced to ink too, so it vanished.
+   They become red tiles with cream glyphs: on-brand and legible. */
+[data-theme="neu"] .feta-screen span[class*="rounded-xl"][style*="rgb(23, 17, 15)"],
+[data-theme="neu"] .feta-screen span[class*="rounded-2xl"][style*="rgb(23, 17, 15)"] {
+  background: var(--feta-red) !important;
+  color: var(--feta-cream) !important;
+  box-shadow:
+    -3px -3px 8px var(--neu-light),
+    4px 4px 10px var(--neu-dark);
+}
+
+/* Amber call-to-action surfaces read as red-on-cream relief. */
 [data-theme="neu"] .feta-lockup[style*="rgb(251, 177, 92)"],
 [data-theme="neu"] .feta-lockup-sm[style*="rgb(251, 177, 92)"] {
   background: var(--neu-bg) !important;
 }
-[data-theme="neu"] .feta-lockup[style*="rgb(251, 177, 92)"] .feta-display {
+[data-theme="neu"] .feta-lockup[style*="rgb(251, 177, 92)"] .feta-display,
+[data-theme="neu"] .feta-lockup-sm[style*="rgb(251, 177, 92)"] .feta-display {
   color: var(--feta-red) !important;
 }
 
