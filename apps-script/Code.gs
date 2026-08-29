@@ -768,6 +768,7 @@ function seedPrizesIfEmpty_() {
     ["1 Bottle", 10, true, "regular", 20],
     ["2 Bottles", 5, true, "regular", 10],
     ["3 Bottles", 3, true, "regular", 5],
+    ["6 Pack", 2, true, "main", 2],
     ["Cap", 5, true, "regular", 10],
     ["Bottle Opener", 10, true, "regular", 20],
     ["Umbrella", 3, true, "regular", 5],

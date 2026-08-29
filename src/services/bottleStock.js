@@ -10,9 +10,13 @@ export const BOTTLES_PER_CRATE = 24;
 /* How many bottles this prize hands over, or 0 if it isn't beer.
    Matches "1 Bottle", "2 Bottles", "3 bottles" and so on. */
 export function bottleCost(prizeName) {
-  const match = String(prizeName || "")
-    .trim()
-    .match(/^(\d+)\s*bottles?$/i);
+  const name = String(prizeName || "").trim();
+
+  /* A 6-pack is six bottles out of the same pool, even though its name
+     doesn't follow the "<n> Bottles" shape. */
+  if (/6\s*-?\s*pack/i.test(name)) return 6;
+
+  const match = name.match(/^(\d+)\s*bottles?$/i);
   return match ? Number(match[1]) : 0;
 }
 

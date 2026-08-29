@@ -2,6 +2,7 @@ import { FETA, FetaMark } from "../brand/FetaBrand";
 import fetaBottle from "../assets/feta-bottle.png";
 import fetaTshirt from "../assets/feta-tshirt.png";
 import fetaCap from "../assets/feta-cap.png";
+import fetaSixPack from "../assets/feta-sixpack.png";
 import { bottleCost } from "../services/bottleStock";
 
 /* The celebration shown when a prize is won. Lives here rather than
@@ -10,15 +11,20 @@ import { bottleCost } from "../services/bottleStock";
 /* Prizes we have real product artwork for. Matched loosely so "T-Shirt",
    "Tshirt" and "T Shirt" all land on the same image. */
 const MERCH = [
+  /* The 6-pack is a single object, so it gets the solo treatment rather
+     than six bottles trying to clink. */
+  { test: /6\s*-?\s*pack/i, src: fetaSixPack, height: 185 },
   { test: /t[\s-]?shirt/i, src: fetaTshirt, height: 190 },
   { test: /\bcap\b/i, src: fetaCap, height: 150 },
 ];
 
 export default function WinCelebration({ prize }) {
   const bottles = bottleCost(prize);
+  const merch = MERCH.find((m) => m.test.test(String(prize || "")));
 
-  if (bottles <= 0) {
-    const merch = MERCH.find((m) => m.test.test(String(prize || "")));
+  /* Merch artwork wins over the bottle animation — a 6-pack costs six
+     from the pool but shouldn't render as six separate bottles. */
+  if (merch || bottles <= 0) {
 
     if (merch) {
       return (

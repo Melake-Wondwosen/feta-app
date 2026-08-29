@@ -10,6 +10,7 @@ export const FALLBACK_PRIZES = [
   { name: "1 Bottle", qty: 10, active: true, tier: "regular", weight: 20 },
   { name: "2 Bottles", qty: 5, active: true, tier: "regular", weight: 10 },
   { name: "3 Bottles", qty: 3, active: true, tier: "regular", weight: 5 },
+  { name: "6 Pack", qty: 2, active: true, tier: "main", weight: 2 },
   { name: "Cap", qty: 5, active: true, tier: "regular", weight: 10 },
   { name: "Bottle Opener", qty: 10, active: true, tier: "regular", weight: 20 },
   { name: "Umbrella", qty: 3, active: true, tier: "regular", weight: 5 },

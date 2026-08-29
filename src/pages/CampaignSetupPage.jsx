@@ -18,9 +18,11 @@ import {
 import fetaBottle from "../assets/feta-bottle.png";
 import fetaTshirt from "../assets/feta-tshirt.png";
 import fetaCap from "../assets/feta-cap.png";
+import fetaSixPack from "../assets/feta-sixpack.png";
 
 /* Thumbnail for a prize, when we have real product artwork for it. */
 function prizeImage(name) {
+  if (/6\s*-?\s*pack/i.test(name)) return fetaSixPack;
   if (isBottlePrize(name)) return fetaBottle;
   if (/t[\s-]?shirt/i.test(name)) return fetaTshirt;
   if (/\bcap\b/i.test(name)) return fetaCap;
