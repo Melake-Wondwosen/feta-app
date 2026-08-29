@@ -37,6 +37,10 @@ function wrapLabel(ctx, text, maxWidth) {
   return [t + "…"];
 }
 
+/* Relative chance of landing on "No Win", overridden by the admin
+   setting when one has been published. */
+const DEFAULT_NO_WIN_WEIGHT = 2;
+
 export default function SpinWheelPage() {
   const { id } = useParams();
   const location = useLocation();
@@ -154,7 +158,6 @@ export default function SpinWheelPage() {
     { bg: FETA.redDeep, fg: FETA.cream },
   ];
   /* How likely "No Win" is, relative to the prize weights set in admin. */
-const DEFAULT_NO_WIN_WEIGHT = 2;
 
 const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
 
@@ -277,6 +280,7 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
   }
 
   function readPointer(slices, deg) {
+    if (!slices.length) return null;
     const normalized = ((-deg % 360) + 360) % 360;
     const frac = normalized / 360;
     for (const sl of slices) {
@@ -539,6 +543,7 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
       drawWheel(finalDeg);
       const result = readPointer(slices, finalDeg);
       setSpinning(false);
+      if (!result) return;
       setWinner({ label: result.label, isNoWin: result.isNoWin });
 
       /* Every spin counts toward reach, win or not. */
