@@ -192,11 +192,14 @@ export default function SpinWheelPage() {
       ...items.map((x, i) => ({ ...x, colorIdx: i, isNoWin: false })),
       { name: "No Win", qty: 2, colorIdx: -1, isNoWin: true },
     ];
-    const total = all.reduce((s, x) => s + x.qty, 0);
+
+    /* Every slice is the same width. Stock still controls how long a
+       prize stays on the wheel — it drops off once it runs out — but it
+       no longer changes the odds of any single spin. */
+    const frac = 1 / all.length;
     const slices = [];
     let acc = 0;
     all.forEach((item) => {
-      const frac = item.qty / total;
       slices.push({
         label: item.name,
         qty: item.qty,
