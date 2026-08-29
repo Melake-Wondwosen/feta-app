@@ -190,9 +190,9 @@ export default function HomePage() {
                 <FaSlidersH />
               </span>
               <span>
-                <span className="feta-display text-sm block">Wheel prizes</span>
+                <span className="feta-display text-sm block">Admin panel</span>
                 <span className="text-xs font-semibold block mt-0.5" style={{ color: FETA.redDeep }}>
-                  Change what every BA sees
+                  Prizes, cities, users and analytics
                 </span>
               </span>
             </span>
