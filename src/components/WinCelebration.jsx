@@ -3,6 +3,8 @@ import fetaBottle from "../assets/feta-bottle.png";
 import fetaTshirt from "../assets/feta-tshirt.png";
 import fetaCap from "../assets/feta-cap.png";
 import fetaSixPack from "../assets/feta-sixpack.png";
+import fetaKeychain from "../assets/feta-keychain.png";
+import fetaOpener from "../assets/feta-opener.png";
 import { bottleCost } from "../services/bottleStock";
 
 /* The celebration shown when a prize is won. Lives here rather than
@@ -16,6 +18,10 @@ const MERCH = [
   { test: /6\s*-?\s*pack/i, src: fetaSixPack, height: 185 },
   { test: /t[\s-]?shirt/i, src: fetaTshirt, height: 190 },
   { test: /\bcap\b/i, src: fetaCap, height: 150 },
+  /* Same physical product, two faces: the logo side for the keychain,
+     the opener cutout for the bottle opener. */
+  { test: /bottle\s*opener|opener/i, src: fetaOpener, height: 165 },
+  { test: /key\s*-?\s*chain|keyring/i, src: fetaKeychain, height: 175 },
 ];
 
 export default function WinCelebration({ prize }) {

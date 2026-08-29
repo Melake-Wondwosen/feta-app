@@ -19,6 +19,8 @@ import fetaBottle from "../assets/feta-bottle.png";
 import fetaTshirt from "../assets/feta-tshirt.png";
 import fetaCap from "../assets/feta-cap.png";
 import fetaSixPack from "../assets/feta-sixpack.png";
+import fetaKeychain from "../assets/feta-keychain.png";
+import fetaOpener from "../assets/feta-opener.png";
 
 /* Thumbnail for a prize, when we have real product artwork for it. */
 function prizeImage(name) {
@@ -26,6 +28,8 @@ function prizeImage(name) {
   if (isBottlePrize(name)) return fetaBottle;
   if (/t[\s-]?shirt/i.test(name)) return fetaTshirt;
   if (/\bcap\b/i.test(name)) return fetaCap;
+  if (/opener/i.test(name)) return fetaOpener;
+  if (/key\s*-?\s*chain|keyring/i.test(name)) return fetaKeychain;
   return null;
 }
 import {
