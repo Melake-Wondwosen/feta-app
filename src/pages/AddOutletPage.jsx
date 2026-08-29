@@ -178,7 +178,22 @@ export default function AddOutletPage() {
       <div className="flex flex-col flex-1 px-6 pt-8 pb-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-7">
-          <FetaMark className="w-12 flex-none" />
+          <button
+            onClick={() => navigate("/home")}
+            aria-label="Back to outlets"
+            className="feta-press flex-none w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{
+              background: FETA.cream,
+              color: FETA.ink,
+              boxShadow: `0 0 0 2px ${FETA.gold}, 0 0 0 4px ${FETA.ink}`,
+              fontSize: 18,
+              fontWeight: 900,
+              lineHeight: 1,
+            }}
+          >
+            ←
+          </button>
+          <FetaMark className="w-10 flex-none" />
           <h1
             className="feta-display text-3xl"
             style={{ color: FETA.cream, textShadow: `3px 3px 0 ${FETA.ink}` }}

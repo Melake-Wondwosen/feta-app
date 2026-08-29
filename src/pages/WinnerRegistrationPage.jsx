@@ -134,6 +134,22 @@ export default function WinnerRegistrationPage() {
 
       {/* Header — the prize is the headline */}
       <div className="relative z-10 pt-7 px-6 flex-none flex flex-col items-center text-center">
+        <button
+          onClick={() => navigate(`/spin/${outletId}`, { state: { outlet } })}
+          aria-label="Back to the wheel"
+          className="feta-press absolute left-6 top-7 w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{
+            background: FETA.cream,
+            color: FETA.ink,
+            boxShadow: `0 0 0 2px ${FETA.gold}, 0 0 0 4px ${FETA.ink}`,
+            fontSize: 18,
+            fontWeight: 900,
+            lineHeight: 1,
+          }}
+        >
+          ←
+        </button>
+
         <FetaMark className="w-16 mb-3 drop-shadow-[0_8px_18px_rgba(0,0,0,0.45)]" />
 
         <p className="feta-eyebrow" style={{ color: FETA.amber }}>

@@ -125,7 +125,22 @@ export default function CampaignSetupPage() {
       {/* Header */}
       <div className="relative z-10 pt-7 px-6 flex-none">
         <div className="flex items-center gap-3 mb-4">
-          <FetaMark className="w-12 flex-none" />
+          <button
+            onClick={() => navigate("/home")}
+            aria-label="Back to outlets"
+            className="feta-press flex-none w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{
+              background: FETA.cream,
+              color: FETA.ink,
+              boxShadow: `0 0 0 2px ${FETA.gold}, 0 0 0 4px ${FETA.ink}`,
+              fontSize: 18,
+              fontWeight: 900,
+              lineHeight: 1,
+            }}
+          >
+            ←
+          </button>
+          <FetaMark className="w-10 flex-none" />
           <div className="min-w-0">
             <h1
               className="feta-display text-2xl"
