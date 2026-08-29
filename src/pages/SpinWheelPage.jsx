@@ -4,6 +4,7 @@ import { FETA, FetaMark, Sunburst, TibebBand } from "../brand/FetaBrand";
 import { API_URL } from "../config";
 import { getWinMessage, fillTemplate, getSettings } from "../services/settingsService";
 import { logSpin } from "../services/statsService";
+import fetaBottle from "../assets/feta-bottle.png";
 import {
   bottleCost,
   isBottlePrize,
@@ -831,7 +832,35 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
             className="feta-lockup w-full max-w-sm text-center py-9 px-6"
             style={{ background: `${FETA.cream}F2`, color: FETA.ink }}
           >
-            <FetaMark className="w-12 mx-auto mb-3" />
+            {bottleCost(regularWinOverlay) > 0 ? (
+              /* Beer wins show the real bottles — one per bottle won —
+                 rising into place in sequence. */
+              <div className="relative flex items-end justify-center gap-2 mb-4 h-28">
+                <span
+                  aria-hidden="true"
+                  className="feta-bottle-glow absolute inset-0 m-auto rounded-full"
+                  style={{
+                    width: 130,
+                    height: 130,
+                    background: `radial-gradient(circle, ${FETA.amber}CC 0%, ${FETA.gold}55 45%, transparent 70%)`,
+                  }}
+                />
+                {Array.from({ length: bottleCost(regularWinOverlay) }).map(
+                  (_, i) => (
+                    <img
+                      key={i}
+                      src={fetaBottle}
+                      alt=""
+                      aria-hidden="true"
+                      className="feta-bottle-pop relative h-28 w-auto drop-shadow-[0_6px_10px_rgba(23,17,15,0.45)]"
+                      style={{ animationDelay: `${i * 0.16}s, ${0.8 + i * 0.16}s` }}
+                    />
+                  )
+                )}
+              </div>
+            ) : (
+              <FetaMark className="w-12 mx-auto mb-3" />
+            )}
             <p className="feta-eyebrow" style={{ color: FETA.redDeep }}>
               🎉 Winner
             </p>
