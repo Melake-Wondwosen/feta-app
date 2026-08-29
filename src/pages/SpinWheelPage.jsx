@@ -772,25 +772,6 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
             </p>
           )}
 
-          {/* Remaining stock */}
-          {campaign.length > 0 && (
-            <div className="flex flex-wrap gap-2 justify-center px-4 max-w-lg">
-              {campaign.map((item, i) => (
-                <span
-                  key={i}
-                  className="px-3 py-1 rounded-full font-bold"
-                  style={{
-                    background: FETA.cream,
-                    color: FETA.ink,
-                    boxShadow: `0 0 0 2px ${FETA.ink}`,
-                    fontSize: Math.max(10, wheelSize * 0.024),
-                  }}
-                >
-                  {item.name} ×{item.qty}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Spin button */}
