@@ -10,7 +10,6 @@ import {
   FetaMark,
   Screen,
   SectionLabel,
-  TibebBand,
 } from "../brand/FetaBrand";
 
 export default function HomePage() {
@@ -171,10 +170,6 @@ export default function HomePage() {
             </span>
           </button>
           )}
-
-          <div className="py-2 opacity-40">
-            <TibebBand height={16} />
-          </div>
 
           {isAdmin(user) && (
             <>
