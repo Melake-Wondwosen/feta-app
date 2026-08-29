@@ -134,9 +134,14 @@ function handleLogin_(e) {
 // ─── Outlets ─────────────────────────────────────────────────────────
 
 function handleGetOutlets_(e) {
-  const baId = String(e.parameter.baId || "");
+  const baId = String(e.parameter.baId || "").trim();
+
+  /* Never fall back to "return everything" — a missing id must yield an
+     empty list, not another BA's outlets. */
+  if (!baId) return json_([]);
+
   const outlets = rowsToObjects_(sheet_(SHEET_OUTLETS)).filter(
-    (o) => String(o.baId) === baId
+    (o) => String(o.baId).trim() === baId
   );
   // outletService.js expects the raw array, not a wrapped object.
   return json_(outlets);

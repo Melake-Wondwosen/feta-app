@@ -19,6 +19,10 @@ export function newestFirst(outlets) {
 }
 
 export async function getOutlets(baId) {
+  /* Without an id there is no such thing as "all outlets" — return
+     nothing rather than letting the request go out unfiltered. */
+  if (!baId) return [];
+
   const deviceId = getDeviceId();
   const response = await fetch(
     `${API_URL}?action=getOutlets&baId=${baId}&deviceId=${deviceId}`
