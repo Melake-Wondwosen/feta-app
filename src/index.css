@@ -608,28 +608,22 @@ select.feta-field {
    Feta red as the single accent.
    ------------------------------------------------------------ */
 [data-theme="neu"] {
-  /* A flat Feta red ground. The highlight is that red lifted toward
-     the light, the shadow is it pushed toward red-dark — so relief
-     reads as the brand colour catching light, not as grey plastic. */
-  --neu-bg: #a81f28;
-  --neu-light: #c9333d;
-  --neu-dark: #6d1016;
+  /* Silver sampled from the woven pattern artwork. Surfaces are that
+     silver; the highlight lifts it toward white and the shadow pushes
+     it toward graphite, so relief reads as brushed metal. The red
+     ground stays behind everything. */
+  --neu-bg: #bdbfc1;
+  --neu-light: #dcdee0;
+  --neu-dark: #8e9092;
 }
 
-/* data-theme sits on <html>, so this reaches <body> directly. */
-[data-theme="neu"] body {
-  background: var(--neu-bg);
-}
-
-[data-theme="neu"] .feta-screen {
-  background: var(--neu-bg) !important;
-  color: var(--feta-ink);
-}
+/* The red ground is left exactly as it is — only the surfaces
+   sitting on it become silver. */
 
 /* The sunburst and woven trims are poster devices — they fight
    the quiet of a relief surface, so they step back sharply. */
 [data-theme="neu"] .feta-rays-turn {
-  opacity: 0.06;
+  opacity: 0.22;
 }
 /* The woven trims stay — they're the strongest red cue on an
    otherwise quiet ground. */
@@ -650,15 +644,28 @@ select.feta-field {
     7px 7px 16px var(--neu-dark);
   text-shadow: none !important;
 }
-/* Panels are the same red as the ground, so anything that was ink
-   (it used to sit on a cream card) has to become cream. */
+/* Silver panels take ink type. Anything that was cream (it used to
+   sit directly on the red ground) has to invert. */
 [data-theme="neu"] .feta-lockup,
 [data-theme="neu"] .feta-lockup-sm,
 [data-theme="neu"] .feta-lockup-flat,
-[data-theme="neu"] .feta-lockup [style*="rgb(23, 17, 15)"],
-[data-theme="neu"] .feta-lockup-sm [style*="rgb(23, 17, 15)"],
-[data-theme="neu"] .feta-lockup-flat [style*="rgb(23, 17, 15)"] {
-  color: var(--feta-cream) !important;
+[data-theme="neu"] .feta-lockup [style*="rgb(255, 244, 228)"],
+[data-theme="neu"] .feta-lockup-sm [style*="rgb(255, 244, 228)"],
+[data-theme="neu"] .feta-lockup-flat [style*="rgb(255, 244, 228)"] {
+  color: var(--feta-ink) !important;
+}
+
+/* Eyebrow labels inside a panel are red; the ones outside, on the
+   red ground, stay amber. */
+[data-theme="neu"] .feta-lockup .feta-eyebrow,
+[data-theme="neu"] .feta-lockup-sm .feta-eyebrow,
+[data-theme="neu"] .feta-lockup-flat .feta-eyebrow {
+  color: var(--feta-red-deep) !important;
+}
+[data-theme="neu"] .feta-lockup .feta-display,
+[data-theme="neu"] .feta-lockup-sm .feta-display,
+[data-theme="neu"] .feta-lockup-flat .feta-display {
+  color: var(--feta-ink) !important;
 }
 
 /* Pressing pushes the surface into the page: the same two
@@ -680,21 +687,21 @@ select.feta-field {
   box-shadow:
     inset -4px -4px 10px var(--neu-light),
     inset 5px 5px 12px var(--neu-dark);
-  color: var(--feta-cream) !important;
+  color: var(--feta-ink) !important;
 }
 [data-theme="neu"] .feta-field::placeholder {
-  color: rgba(255, 244, 228, 0.45);
+  color: rgba(23, 17, 15, 0.4);
 }
 [data-theme="neu"] .feta-field:focus-visible {
   box-shadow:
     inset -4px -4px 10px var(--neu-light),
     inset 5px 5px 12px var(--neu-dark),
-    0 0 0 2px var(--feta-amber);
+    0 0 0 2px var(--feta-red);
 }
 [data-theme="neu"] select.feta-field {
   background-image:
-    linear-gradient(45deg, transparent 50%, var(--feta-amber) 50%),
-    linear-gradient(135deg, var(--feta-amber) 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, var(--feta-red) 50%),
+    linear-gradient(135deg, var(--feta-red) 50%, transparent 50%);
 }
 
 /* Red is the accent and it belongs on the brand furniture. */
@@ -705,10 +712,9 @@ select.feta-field {
 }
 
 /* Cream type on a red ground, as everywhere else in the app. */
-[data-theme="neu"] .feta-screen h1,
-[data-theme="neu"] .feta-screen h2 {
+[data-theme="neu"] .feta-screen > div > h1,
+[data-theme="neu"] .feta-screen h1 {
   color: var(--feta-cream) !important;
-  text-shadow: none !important;
 }
 
 /* Icon chips were solid ink squares — heavy on a soft cream ground,
@@ -716,8 +722,8 @@ select.feta-field {
    They become red tiles with cream glyphs: on-brand and legible. */
 [data-theme="neu"] .feta-screen span[class*="rounded-xl"][style*="rgb(23, 17, 15)"],
 [data-theme="neu"] .feta-screen span[class*="rounded-2xl"][style*="rgb(23, 17, 15)"] {
-  background: var(--neu-bg) !important;
-  color: var(--feta-amber) !important;
+  background: var(--feta-red) !important;
+  color: var(--feta-cream) !important;
   box-shadow:
     -3px -3px 8px var(--neu-light),
     4px 4px 10px var(--neu-dark);
