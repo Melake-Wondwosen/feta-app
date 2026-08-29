@@ -128,7 +128,15 @@ export default function HomePage() {
             </div>
           )}
 
-          {!isAdmin(user) && outlets.map((outlet) => (
+          {/* The list scrolls inside a fixed window — roughly four cards
+              tall — so "Add an outlet" stays reachable no matter how many
+              outlets a BA has registered. */}
+          {!isAdmin(user) && outlets.length > 0 && (
+          <div
+            className="overflow-y-auto space-y-4 -mx-2 px-2 py-1"
+            style={{ maxHeight: "23rem", overscrollBehavior: "contain" }}
+          >
+          {outlets.map((outlet) => (
             <button
               key={outlet.id}
               onClick={() => openOutlet(outlet)}
@@ -157,6 +165,8 @@ export default function HomePage() {
               </span>
             </button>
           ))}
+          </div>
+          )}
 
           {/* Add outlet — field work, not an admin task */}
           {!isAdmin(user) && (
