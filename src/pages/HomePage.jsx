@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
-import { FaPlus, FaStore, FaSlidersH } from "react-icons/fa";
+import { FaPlus, FaStore } from "react-icons/fa";
 import { getOutlets } from "../services/outletService";
 import { isAdmin } from "../components/AdminRoute";
 import { pingPresence } from "../services/statsService";
@@ -177,33 +177,66 @@ export default function HomePage() {
           </div>
 
           {isAdmin(user) && (
-          <button
-            onClick={() => navigate("/admin")}
-            className="feta-lockup-sm feta-press w-full p-4 flex items-center justify-between gap-3"
-            style={{ background: FETA.amber, color: FETA.ink }}
-          >
-            <span className="flex items-center gap-4 text-left">
-              <span
-                className="w-11 h-11 rounded-xl flex items-center justify-center flex-none"
-                style={{ background: FETA.ink, color: FETA.amber }}
-              >
-                <FaSlidersH />
-              </span>
-              <span>
-                <span className="feta-display text-sm block">Admin panel</span>
-                <span className="text-xs font-semibold block mt-0.5" style={{ color: FETA.redDeep }}>
-                  Prizes, cities, users and analytics
-                </span>
-              </span>
-            </span>
-            <span
-              className="feta-eyebrow px-2.5 py-1.5 rounded-md flex-none"
-              style={{ background: FETA.ink, color: FETA.amber }}
-            >
-              Admin
-            </span>
-          </button>
-        )}
+            <>
+              <SectionLabel>Admin</SectionLabel>
+
+              {[
+                {
+                  to: "/admin/prizes",
+                  icon: "🎁",
+                  title: "Wheel prizes",
+                  blurb: "Stock levels and prize tiers",
+                },
+                {
+                  to: "/admin/cities",
+                  icon: "📍",
+                  title: "Cities",
+                  blurb: "What BAs pick when adding an outlet",
+                },
+                {
+                  to: "/admin/users",
+                  icon: "👥",
+                  title: "Users",
+                  blurb: "Usernames, passwords and roles",
+                },
+                {
+                  to: "/admin/analytics",
+                  icon: "📊",
+                  title: "National analytics",
+                  blurb: "Reach and prizes across every division",
+                },
+              ].map((item) => (
+                <button
+                  key={item.to}
+                  onClick={() => navigate(item.to)}
+                  className="feta-lockup-sm feta-press w-full p-4 flex items-center gap-4 text-left"
+                  style={{ background: FETA.amber, color: FETA.ink }}
+                >
+                  <span
+                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-none"
+                    style={{ background: FETA.ink, fontSize: 19 }}
+                  >
+                    {item.icon}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="feta-display text-sm block">{item.title}</span>
+                    <span
+                      className="text-xs font-semibold block mt-0.5"
+                      style={{ color: FETA.redDeep }}
+                    >
+                      {item.blurb}
+                    </span>
+                  </span>
+                  <span
+                    className="feta-display flex-none"
+                    style={{ color: `${FETA.ink}66`, fontSize: 17 }}
+                  >
+                    →
+                  </span>
+                </button>
+              ))}
+            </>
+          )}
         </div>
 
         {/* Sign out */}

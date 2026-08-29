@@ -150,7 +150,7 @@ export default function ManagerDashboardPage({ national = false }) {
           <PageHeader
             title="National analytics"
             subtitle="Every division"
-            to="/admin"
+            to="/home"
           />
         ) : (
           <div className="flex items-center gap-3 mb-5">

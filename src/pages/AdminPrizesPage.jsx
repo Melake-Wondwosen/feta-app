@@ -134,7 +134,7 @@ export default function AdminPrizesPage() {
         <PageHeader
           title="Wheel prizes"
           subtitle={`${activeCount} on the wheel · ${prizes.length} in the list`}
-          to="/admin"
+          to="/home"
         />
 
         {loading && (

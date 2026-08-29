@@ -71,7 +71,7 @@ export default function AdminCitiesPage() {
         <PageHeader
           title="Cities"
           subtitle={`${cities.length} in the list`}
-          to="/admin"
+          to="/home"
         />
 
         {notice && (

@@ -107,7 +107,7 @@ export default function AdminUsersPage() {
         <PageHeader
           title="Users"
           subtitle={unlocked ? `${users.length} accounts` : "Locked"}
-          to="/admin"
+          to="/home"
         />
 
         {notice && (
