@@ -1,11 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
-import { FaPlus, FaStore, FaFileDownload, FaSlidersH } from "react-icons/fa";
+import { FaPlus, FaStore, FaSlidersH } from "react-icons/fa";
 import { getOutlets } from "../services/outletService";
-import { getDeviceId } from "../services/deviceId";
 import { isAdmin } from "../components/AdminRoute";
-import { API_URL } from "../config";
 import { pingPresence } from "../services/statsService";
 import {
   FETA,
@@ -18,7 +16,6 @@ import {
 export default function HomePage() {
   const [outlets, setOutlets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [downloading, setDownloading] = useState(false);
 
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -52,46 +49,6 @@ export default function HomePage() {
       setLoading(false);
     }
   }
-
-  const generateMyDailyPDF = async () => {
-    setDownloading(true);
-    try {
-      const deviceId = getDeviceId();
-      const today = new Date().toISOString().split("T")[0];
-
-      const response = await fetch(
-        `${API_URL}?action=generateMyDailyPDF&deviceId=${deviceId}&date=${today}`
-      );
-      const result = await response.json();
-
-      if (!result.success) {
-        alert("Report failed: " + result.message);
-        return;
-      }
-
-      const byteChars = atob(result.pdf);
-      const byteArrays = [];
-      for (let i = 0; i < byteChars.length; i += 512) {
-        const slice = byteChars.slice(i, i + 512);
-        const bytes = new Uint8Array(slice.length);
-        for (let j = 0; j < slice.length; j++) bytes[j] = slice.charCodeAt(j);
-        byteArrays.push(bytes);
-      }
-
-      const pdfBlob = new Blob(byteArrays, { type: "application/pdf" });
-      const url = URL.createObjectURL(pdfBlob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `feta-report-${today}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error(err);
-      alert("Report failed: " + err.message);
-    } finally {
-      setDownloading(false);
-    }
-  };
 
   const openOutlet = (outlet) => {
     const existingCampaign = localStorage.getItem(`campaign_${outlet.id}`);
@@ -245,37 +202,6 @@ export default function HomePage() {
             </span>
           </button>
         )}
-
-        {/* Daily report */}
-          <button
-            onClick={generateMyDailyPDF}
-            disabled={downloading}
-            className="feta-lockup-sm feta-press w-full p-4 flex items-center justify-between gap-3 disabled:opacity-50"
-            style={{ background: FETA.ink, color: FETA.cream }}
-          >
-            <span className="flex items-center gap-4 text-left">
-              <span
-                className="w-11 h-11 rounded-xl flex items-center justify-center flex-none"
-                style={{ background: FETA.amber, color: FETA.ink }}
-              >
-                <FaFileDownload className={downloading ? "animate-bounce" : ""} />
-              </span>
-              <span>
-                <span className="feta-display text-sm block" style={{ color: FETA.cream }}>
-                  {downloading ? "Building report…" : "Today's report"}
-                </span>
-                <span className="text-xs font-semibold block mt-0.5" style={{ color: FETA.amber }}>
-                  Winners from your outlets only
-                </span>
-              </span>
-            </span>
-            <span
-              className="feta-eyebrow px-2.5 py-1.5 rounded-md flex-none"
-              style={{ background: FETA.red, color: FETA.cream }}
-            >
-              PDF
-            </span>
-          </button>
         </div>
 
         {/* Sign out */}
