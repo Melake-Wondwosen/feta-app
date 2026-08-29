@@ -446,13 +446,25 @@ function handleSaveUsers_(payload) {
 
 // ─── Prizes ──────────────────────────────────────────────────────────
 
+/* A number that may have been stored as a Date by Sheets' autoformatting.
+   Converts back via the 1899-12-30 epoch rather than silently reading 0. */
+function readNumber_(value, fallback) {
+  if (value === "" || value === null || value === undefined) return fallback;
+  if (value instanceof Date) {
+    const epoch = new Date(1899, 11, 30);
+    return Math.round((value - epoch) / 86400000);
+  }
+  const n = Number(value);
+  return isNaN(n) ? fallback : n;
+}
+
 function handleGetPrizes_(e) {
   const prizes = rowsToObjects_(sheet_(SHEET_PRIZES)).map((p) => ({
     name: p.name,
     qty: Number(p.qty) || 0,
     active: String(p.active).toLowerCase() !== "false",
     tier: p.tier === "main" ? "main" : "regular",
-    weight: p.weight === "" || p.weight === undefined ? 1 : Number(p.weight) || 0,
+    weight: readNumber_(p.weight, 1),
   }));
   return json_({ success: true, prizes: prizes });
 }
@@ -464,6 +476,13 @@ function handleSavePrizes_(payload) {
   const sheet = sheet_(SHEET_PRIZES);
   sheet.clear();
   sheet.appendRow(["name", "qty", "active", "tier", "weight", "updatedAt"]);
+
+  /* Sheets will happily reinterpret a plain number typed into this column
+     as a date (0 becomes 31/12/1899). Forcing the qty and weight columns
+     to a plain number format stops that, so the values survive a round
+     trip through the spreadsheet. */
+  sheet.getRange("B:B").setNumberFormat("0");
+  sheet.getRange("E:E").setNumberFormat("0");
 
   const now = new Date();
   (payload.prizes || []).forEach((p) => {
