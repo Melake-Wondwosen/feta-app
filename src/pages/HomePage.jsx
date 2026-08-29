@@ -99,7 +99,7 @@ export default function HomePage() {
 
         <SectionLabel>My outlets</SectionLabel>
 
-        <div className="flex-1 space-y-4">
+        <div className="space-y-4">
           {loading && (
             <p
               className="text-center py-6 text-sm font-semibold"
