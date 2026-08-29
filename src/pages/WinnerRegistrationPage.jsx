@@ -19,8 +19,6 @@ export default function WinnerRegistrationPage() {
   const { user } = useAuth();
 
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [loading, setLoading] = useState(false);
   const [winMessage, setWinMessage] = useState(
@@ -40,8 +38,8 @@ export default function WinnerRegistrationPage() {
   }, []);
 
   const submit = async () => {
-    if (!fullName || !phone) {
-      alert("Enter the winner's name and phone number.");
+    if (!fullName.trim()) {
+      alert("Enter the winner's name.");
       return;
     }
 
@@ -56,8 +54,8 @@ export default function WinnerRegistrationPage() {
         tier: "main",
         baId: user?.id,
         fullName,
-        phone,
-        age,
+        phone: "",
+        age: "",
         gender,
         date: new Date().toISOString(),
       };
@@ -183,48 +181,20 @@ export default function WinnerRegistrationPage() {
         )}
 
         {field(
-          "Phone number",
-          <input
-            type="tel"
-            inputMode="tel"
-            placeholder="09xx xxx xxx"
+          "Gender",
+          <select
             className="feta-field"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            autoComplete="tel"
-          />
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+          >
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
-          {field(
-            "Age",
-            <input
-              type="number"
-              inputMode="numeric"
-              min="21"
-              placeholder="21+"
-              className="feta-field"
-              value={age}
-              onChange={(e) => setAge(e.target.value)}
-            />
-          )}
-
-          {field(
-            "Gender",
-            <select
-              className="feta-field"
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-            >
-              <option value="">Select</option>
-              <option>Male</option>
-              <option>Female</option>
-            </select>
-          )}
-        </div>
-
         <p className="text-xs font-semibold pt-1" style={{ color: `${FETA.cream}AA` }}>
-          Prizes go to people aged 21 and over. Check ID before you confirm.
+          Prizes go to people aged 21 and over. Check their ID before you confirm.
         </p>
       </div>
 
