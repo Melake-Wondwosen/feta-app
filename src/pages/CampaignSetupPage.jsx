@@ -15,6 +15,7 @@ import {
   FALLBACK_PRIZES,
 } from "../services/prizeService";
 
+import fetaBottle from "../assets/feta-bottle.png";
 import {
   BOTTLES_PER_CRATE,
   isBottlePrize,
@@ -206,6 +207,14 @@ export default function CampaignSetupPage() {
                     boxShadow: `0 0 0 2px ${on ? FETA.red : FETA.gold}, 0 0 0 4px ${FETA.ink}`,
                   }}
                 >
+                  {isBottlePrize(prize) && (
+                    <img
+                      src={fetaBottle}
+                      alt=""
+                      aria-hidden="true"
+                      className="h-7 w-auto mx-auto mb-1"
+                    />
+                  )}
                   {item.tier === "main" ? "★ " : ""}
                   {on ? `✓ ${prize}` : prize}
                 </button>
@@ -312,7 +321,15 @@ export default function CampaignSetupPage() {
                   style={{ background: FETA.cream, color: FETA.ink }}
                 >
                   <div className="flex justify-between items-center gap-3">
-                    <h4 className="feta-display text-sm truncate flex items-center gap-1.5">
+                    {isBottlePrize(prize.name) && (
+                      <img
+                        src={fetaBottle}
+                        alt=""
+                        aria-hidden="true"
+                        className="flex-none h-10 w-auto drop-shadow-[0_2px_4px_rgba(23,17,15,0.3)]"
+                      />
+                    )}
+                    <h4 className="feta-display text-sm truncate flex items-center gap-1.5 flex-1">
                       {prize.tier === "main" && <span>★</span>}
                       {prize.name}
                     </h4>
