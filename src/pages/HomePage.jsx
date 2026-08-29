@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
 import { FaPlus, FaStore } from "react-icons/fa";
-import { getOutlets } from "../services/outletService";
+import { getOutlets, newestFirst } from "../services/outletService";
 import { isAdmin } from "../components/AdminRoute";
 import { pingPresence } from "../services/statsService";
 import {
@@ -29,7 +29,7 @@ export default function HomePage() {
     }
 
     const cached = localStorage.getItem(`outlets_${user.id}`);
-    if (cached) setOutlets(JSON.parse(cached));
+    if (cached) setOutlets(newestFirst(JSON.parse(cached)));
 
     loadOutlets();
   }, [user]);
