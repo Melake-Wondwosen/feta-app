@@ -214,115 +214,168 @@ select.feta-field {
 
 /* ============================================================
    THEMES
-   The default look is the poster/lockup construction above.
-   These two alternatives re-skin the same shared surface
-   classes, so no page markup has to change. Some components
-   set a background inline, so the surface rules here use
-   !important to win — that's deliberate, not sloppy.
+
+   Both alternatives are built from the same materials as the
+   logo — gold, ink, cream, red — so the app still reads as
+   Feta rather than as a generic UI style. They re-skin the
+   shared surface classes only; no page markup changes.
+
+   Some components set their background inline, so surface
+   rules here use !important to win. That's deliberate.
    ============================================================ */
 
-/* ---------- SKEUOMORPHIC ----------
-   Physical materials: bevelled edges, inner highlights, a
-   light source from above, and soft cast shadows. */
+/* ---------- BRASS (skeuomorphic) ----------
+   Enamel signage on a brass frame: a real metal edge with a
+   lit top and dark underside, a glass-like sheen across the
+   face, and a soft shadow cast on the red ground. */
 [data-theme="skeuo"] .feta-lockup,
 [data-theme="skeuo"] .feta-lockup-sm,
 [data-theme="skeuo"] .feta-lockup-flat {
-  border-radius: 14px;
+  border-radius: 13px;
+  border-top: 1px solid var(--feta-gold-lit);
+  border-left: 1px solid var(--feta-gold);
+  border-right: 1px solid var(--feta-gold);
+  border-bottom: 1px solid var(--feta-red-dark);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.75),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.22),
-    0 1px 0 rgba(255, 255, 255, 0.25),
-    0 3px 5px rgba(0, 0, 0, 0.35),
-    0 10px 18px rgba(0, 0, 0, 0.32);
-  border: 1px solid rgba(0, 0, 0, 0.4);
-  background-image: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.28) 0%,
-    rgba(255, 255, 255, 0) 45%,
-    rgba(0, 0, 0, 0.09) 100%
-  );
+    /* brass rim */
+    0 0 0 3px var(--feta-gold),
+    0 0 0 4px var(--feta-red-dark),
+    /* lit top edge and shaded base, inside the face */
+    inset 0 2px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -3px 6px rgba(72, 10, 14, 0.28),
+    /* the panel sits above the poster */
+    0 6px 14px rgba(23, 17, 15, 0.45),
+    0 14px 28px rgba(23, 17, 15, 0.3);
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0.08) 38%,
+      rgba(124, 19, 25, 0.06) 62%,
+      rgba(72, 10, 14, 0.16) 100%
+    ),
+    /* faint diagonal sheen, like light across enamel */
+    linear-gradient(
+      104deg,
+      transparent 42%,
+      rgba(255, 255, 255, 0.22) 50%,
+      transparent 58%
+    );
 }
 
 [data-theme="skeuo"] .feta-press:active:not(:disabled),
 [data-theme="skeuo"] .feta-lockup-sm.feta-press:active:not(:disabled) {
-  transform: translateY(2px);
+  transform: translateY(3px);
   box-shadow:
-    inset 0 2px 5px rgba(0, 0, 0, 0.45),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.2),
-    0 1px 2px rgba(0, 0, 0, 0.3);
+    0 0 0 3px var(--feta-gold),
+    0 0 0 4px var(--feta-red-dark),
+    inset 0 3px 8px rgba(72, 10, 14, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.25),
+    0 1px 2px rgba(23, 17, 15, 0.4);
   background-image: linear-gradient(
     180deg,
-    rgba(0, 0, 0, 0.14) 0%,
-    rgba(255, 255, 255, 0.12) 100%
+    rgba(72, 10, 14, 0.2) 0%,
+    rgba(255, 255, 255, 0.14) 100%
   );
 }
 
 [data-theme="skeuo"] .feta-field {
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 9px;
+  border: 1px solid var(--feta-gold);
   box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.28),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.5),
-    0 1px 0 rgba(255, 255, 255, 0.22);
+    inset 0 3px 6px rgba(72, 10, 14, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.6),
+    0 1px 0 var(--feta-gold-lit);
 }
 [data-theme="skeuo"] .feta-field:focus-visible {
+  border-color: var(--feta-amber);
   box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.28),
+    inset 0 3px 6px rgba(72, 10, 14, 0.3),
     0 0 0 3px var(--feta-amber);
 }
 
-/* ---------- GLASSMORPHIC ----------
-   Frosted panels over the red ground: translucent fills, a
-   bright hairline edge, and a blur behind. */
+/* ---------- SMOKED GLASS ----------
+   Tinted panels lit from the top-left, holding the palette
+   rather than washing it out. Cream stays cream, gold stays
+   gold — the surface is what turns to glass. */
 [data-theme="glass"] .feta-lockup,
 [data-theme="glass"] .feta-lockup-sm,
 [data-theme="glass"] .feta-lockup-flat {
-  border-radius: 22px;
-  background: rgba(255, 244, 228, 0.16) !important;
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  border: 1px solid rgba(255, 244, 228, 0.4);
+  border-radius: 20px;
+  background:
+    linear-gradient(
+      142deg,
+      rgba(255, 244, 228, 0.26) 0%,
+      rgba(255, 244, 228, 0.1) 46%,
+      rgba(72, 10, 14, 0.16) 100%
+    ) !important;
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid rgba(255, 244, 228, 0.22);
+  border-top-color: rgba(255, 244, 228, 0.55);
+  border-left-color: rgba(255, 244, 228, 0.35);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 8px 32px rgba(0, 0, 0, 0.32);
-  color: var(--feta-cream) !important;
+    /* a thin gold thread, so the brand survives the frost */
+    0 0 0 1px rgba(183, 139, 50, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -20px 40px -20px rgba(72, 10, 14, 0.5),
+    0 10px 34px rgba(23, 17, 15, 0.4);
+  color: var(--feta-cream);
 }
 
-/* Text inside a frosted panel has to lift off the red ground. */
-[data-theme="glass"] .feta-lockup *,
-[data-theme="glass"] .feta-lockup-sm *,
-[data-theme="glass"] .feta-lockup-flat * {
+/* Only text that would be unreadable on frost gets lifted —
+   amber and gold accents keep their own colour. */
+[data-theme="glass"] .feta-lockup,
+[data-theme="glass"] .feta-lockup-sm,
+[data-theme="glass"] .feta-lockup-flat,
+[data-theme="glass"] .feta-lockup .feta-display,
+[data-theme="glass"] .feta-lockup-sm .feta-display,
+[data-theme="glass"] .feta-lockup-flat .feta-display {
+  text-shadow: 0 1px 3px rgba(23, 17, 15, 0.5);
+}
+[data-theme="glass"] .feta-lockup [style*="rgb(23, 17, 15)"],
+[data-theme="glass"] .feta-lockup-sm [style*="rgb(23, 17, 15)"],
+[data-theme="glass"] .feta-lockup-flat [style*="rgb(23, 17, 15)"] {
   color: var(--feta-cream) !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 [data-theme="glass"] .feta-press:active:not(:disabled),
 [data-theme="glass"] .feta-lockup-sm.feta-press:active:not(:disabled) {
-  transform: scale(0.985);
-  background: rgba(255, 244, 228, 0.26) !important;
+  transform: scale(0.98);
+  background: linear-gradient(
+    142deg,
+    rgba(255, 244, 228, 0.34) 0%,
+    rgba(255, 244, 228, 0.16) 100%
+  ) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 4px 16px rgba(0, 0, 0, 0.3);
+    0 0 0 1px rgba(251, 177, 92, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 3px 12px rgba(23, 17, 15, 0.35);
 }
 
 [data-theme="glass"] .feta-field {
-  border-radius: 14px;
-  background: rgba(255, 244, 228, 0.14) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 244, 228, 0.38);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border-radius: 13px;
+  background: rgba(23, 17, 15, 0.28) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 244, 228, 0.28);
+  border-top-color: rgba(255, 244, 228, 0.12);
+  box-shadow:
+    inset 0 2px 6px rgba(23, 17, 15, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.12);
   color: var(--feta-cream) !important;
 }
 [data-theme="glass"] .feta-field::placeholder {
-  color: rgba(255, 244, 228, 0.6);
+  color: rgba(255, 244, 228, 0.5);
 }
 [data-theme="glass"] .feta-field:focus-visible {
+  border-color: var(--feta-amber);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 0 0 3px var(--feta-amber);
+    inset 0 2px 6px rgba(23, 17, 15, 0.4),
+    0 0 0 2px var(--feta-amber);
 }
 [data-theme="glass"] select.feta-field {
-  background-image: linear-gradient(45deg, transparent 50%, var(--feta-cream) 50%),
-    linear-gradient(135deg, var(--feta-cream) 50%, transparent 50%);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--feta-amber) 50%),
+    linear-gradient(135deg, var(--feta-amber) 50%, transparent 50%);
 }

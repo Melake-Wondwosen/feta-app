@@ -9,13 +9,13 @@ export const THEMES = [
   },
   {
     key: "skeuo",
-    name: "Skeuomorphic",
-    blurb: "Bevelled, physical surfaces with a light from above",
+    name: "Brass",
+    blurb: "Enamel signage on a brass frame, lit from above",
   },
   {
     key: "glass",
-    name: "Glass",
-    blurb: "Frosted translucent panels over the red ground",
+    name: "Smoked glass",
+    blurb: "Tinted frosted panels with a gold thread",
   },
 ];
 
