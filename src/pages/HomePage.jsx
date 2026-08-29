@@ -202,6 +202,12 @@ export default function HomePage() {
                   blurb: "Stock levels and prize tiers",
                 },
                 {
+                  to: "/admin/preview",
+                  icon: "▶️",
+                  title: "Preview animations",
+                  blurb: "Test what a consumer sees when they win",
+                },
+                {
                   to: "/admin/cities",
                   icon: "📍",
                   title: "Cities",
@@ -212,12 +218,6 @@ export default function HomePage() {
                   icon: "👥",
                   title: "Users",
                   blurb: "Usernames, passwords and roles",
-                },
-                {
-                  to: "/admin/preview",
-                  icon: "▶️",
-                  title: "Preview animations",
-                  blurb: "Test what a consumer sees when they win",
                 },
                 {
                   to: "/admin/theme",
