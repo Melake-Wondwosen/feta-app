@@ -203,7 +203,9 @@ select.feta-field {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
+  /* The prize celebration opts out — see the reduced-motion block further
+     down, which gives it a calm fade instead of nothing at all. */
+  *:not(.feta-bottle-solo):not(.feta-cheers-left):not(.feta-cheers-right):not(.feta-cheers-centre):not(.feta-bottle-glow),
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
@@ -572,13 +574,38 @@ select.feta-field {
   animation: feta-bottle-glow 1.2s ease-out backwards;
 }
 
+/* Reduced motion — which Android's Battery Saver and iOS's Reduce Motion
+   both trigger — must not leave the prize reveal blank. The swinging and
+   clinking stop; a calm fade and the resting tilt remain, so the win
+   still reads. */
 @media (prefers-reduced-motion: reduce) {
   .feta-bottle-solo,
-  .feta-cheers-left,
-  .feta-cheers-right,
-  .feta-cheers-centre,
-  .feta-clink-spark,
+  .feta-cheers-centre {
+    animation: feta-gentle-in 0.45s ease-out backwards !important;
+  }
+  .feta-cheers-left {
+    animation: feta-gentle-in 0.45s ease-out backwards !important;
+    transform: rotate(11deg);
+  }
+  .feta-cheers-right {
+    animation: feta-gentle-in 0.45s ease-out backwards !important;
+    transform: rotate(-11deg);
+  }
   .feta-bottle-glow {
+    animation: feta-gentle-in 0.45s ease-out backwards !important;
+    opacity: 0.55;
+  }
+  .feta-clink-spark {
     animation: none !important;
+    opacity: 0;
+  }
+}
+
+@keyframes feta-gentle-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
