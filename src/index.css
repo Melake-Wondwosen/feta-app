@@ -381,97 +381,23 @@ select.feta-field {
 }
 
 /* ------------------------------------------------------------
-   Scrollbar: a chunky ink pill with grip lines riding a pale
-   cream track, capped top and bottom with arrow buttons.
-   Applied to any pane marked .feta-scroll.
+   Scrollbar: a plain hairline. No track, no arrows, no chrome.
    ------------------------------------------------------------ */
 .feta-scroll {
-  scrollbar-width: auto;
-  scrollbar-color: var(--feta-ink) var(--feta-cream);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 244, 228, 0.4) transparent;
 }
 
 .feta-scroll::-webkit-scrollbar {
-  width: 15px;
+  width: 3px;
 }
-
 .feta-scroll::-webkit-scrollbar-track {
-  background: var(--feta-cream);
-  border-radius: 999px;
-  box-shadow: inset 0 0 0 1px rgba(23, 17, 15, 0.12);
+  background: transparent;
 }
-
-/* The thumb: rounded ink capsule, lit along the top, with a
-   soft shadow so it reads as sitting above the track. Grip
-   lines are drawn as repeating cream bars down the middle. */
 .feta-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 244, 228, 0.4);
   border-radius: 999px;
-  border: 3px solid var(--feta-cream);
-  background-color: var(--feta-ink);
-  background-image: linear-gradient(
-    to bottom,
-    transparent 0 34%,
-    var(--feta-cream) 34% 40%,
-    transparent 40% 47%,
-    var(--feta-cream) 47% 53%,
-    transparent 53% 60%,
-    var(--feta-cream) 60% 66%,
-    transparent 66%
-  );
-  background-repeat: no-repeat;
-  background-size: 46% 100%;
-  background-position: center;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 244, 228, 0.35),
-    0 1px 3px rgba(23, 17, 15, 0.4);
-  min-height: 54px;
 }
-.feta-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: var(--feta-red-deep);
-}
-.feta-scroll::-webkit-scrollbar-thumb:active {
-  background-color: var(--feta-red);
-}
-
-/* Arrow caps at each end, matching the thumb's material. */
-.feta-scroll::-webkit-scrollbar-button:single-button {
-  display: block;
-  height: 15px;
-  background-color: var(--feta-ink);
-  border-radius: 6px;
-  border: 3px solid var(--feta-cream);
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 7px 7px;
-}
-.feta-scroll::-webkit-scrollbar-button:single-button:vertical:decrement {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><polygon points='5,1 9,8 1,8' fill='%23FFF4E4'/></svg>");
-}
-.feta-scroll::-webkit-scrollbar-button:single-button:vertical:increment {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><polygon points='5,9 1,2 9,2' fill='%23FFF4E4'/></svg>");
-}
-
-/* Glass theme: the same shape, rendered in frosted cream. */
-[data-theme="glass"] .feta-scroll {
-  scrollbar-color: rgba(255, 244, 228, 0.75) rgba(23, 17, 15, 0.3);
-}
-[data-theme="glass"] .feta-scroll::-webkit-scrollbar-track {
-  background: rgba(23, 17, 15, 0.3);
-  box-shadow: inset 0 0 0 1px rgba(255, 244, 228, 0.18);
-}
-[data-theme="glass"] .feta-scroll::-webkit-scrollbar-thumb,
-[data-theme="glass"] .feta-scroll::-webkit-scrollbar-button:single-button {
-  background-color: rgba(255, 244, 228, 0.82);
-  border-color: transparent;
-}
-[data-theme="glass"] .feta-scroll::-webkit-scrollbar-thumb {
-  background-image: linear-gradient(
-    to bottom,
-    transparent 0 34%,
-    rgba(23, 17, 15, 0.55) 34% 40%,
-    transparent 40% 47%,
-    rgba(23, 17, 15, 0.55) 47% 53%,
-    transparent 53% 60%,
-    rgba(23, 17, 15, 0.55) 60% 66%,
-    transparent 66%
-  );
+.feta-scroll::-webkit-scrollbar-button {
+  display: none;
 }
