@@ -90,7 +90,7 @@ export default function AdminPrizesPage() {
       return;
     }
 
-    setPrizes((prev) => [...prev, { name, qty: 5, active: true, tier: "regular" }]);
+    setPrizes((prev) => [...prev, { name, qty: 5, active: true, tier: "regular", weight: 10 }]);
     setNewName("");
     setError("");
     setDirty(true);
@@ -126,6 +126,23 @@ export default function AdminPrizesPage() {
   };
 
   const activeCount = prizes.filter((p) => p.active).length;
+
+  /* Live odds so the weights mean something concrete. Only active
+     prizes compete, and the wheel's built-in "No Win" slice is counted
+     too, so these match what a consumer actually experiences. */
+  const NO_WIN_WEIGHT = 2;
+  const totalWeight =
+    prizes
+      .filter((p) => p.active)
+      .reduce((sum, p) => sum + (Number(p.weight) || 0), 0) + NO_WIN_WEIGHT;
+
+  const oddsFor = (p) => {
+    if (!p.active) return "hidden";
+    const w = Number(p.weight) || 0;
+    if (w <= 0) return "never";
+    const pct = (w / totalWeight) * 100;
+    return pct < 1 ? `${pct.toFixed(1)}%` : `${Math.round(pct)}%`;
+  };
   const cachedAt = readCacheTime();
 
   return (
@@ -237,6 +254,26 @@ export default function AdminPrizesPage() {
                 >
                   Delete
                 </button>
+              </div>
+
+              <div className="flex items-center gap-3 mt-3">
+                <span className="feta-eyebrow" style={{ color: FETA.redDeep }}>
+                  Chance
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  value={p.weight}
+                  onChange={(e) => update(i, { weight: e.target.value })}
+                  aria-label={`Chance weight for ${p.name}`}
+                  className="feta-field w-20 !py-2 text-center"
+                />
+                <span
+                  className="text-xs font-bold"
+                  style={{ color: FETA.redDeep }}
+                >
+                  {oddsFor(p)}
+                </span>
               </div>
 
               <div className="flex items-center gap-3 mt-3">

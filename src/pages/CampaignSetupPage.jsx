@@ -46,12 +46,17 @@ export default function CampaignSetupPage() {
     };
   }, []);
 
-  const addPrize = (prizeName, defaultQty = 1, tier = "regular") => {
+  const addPrize = (prizeName, defaultQty = 1, tier = "regular", weight = 10) => {
     const existing = prizes.find((p) => p.name === prizeName);
     if (existing) return;
     setPrizes([
       ...prizes,
-      { name: prizeName, qty: Number(defaultQty) || 1, tier: tier === "main" ? "main" : "regular" },
+      {
+        name: prizeName,
+        qty: Number(defaultQty) || 1,
+        tier: tier === "main" ? "main" : "regular",
+        weight: Number(weight) || 0,
+      },
     ]);
   };
 
@@ -158,7 +163,7 @@ export default function CampaignSetupPage() {
               return (
                 <button
                   key={prize}
-                  onClick={() => addPrize(prize, item.qty, item.tier)}
+                  onClick={() => addPrize(prize, item.qty, item.tier, item.weight)}
                   className="feta-press py-3 px-2 rounded-xl font-extrabold text-xs"
                   style={{
                     background: on ? FETA.amber : FETA.cream,

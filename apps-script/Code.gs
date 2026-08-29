@@ -452,6 +452,7 @@ function handleGetPrizes_(e) {
     qty: Number(p.qty) || 0,
     active: String(p.active).toLowerCase() !== "false",
     tier: p.tier === "main" ? "main" : "regular",
+    weight: p.weight === "" || p.weight === undefined ? 1 : Number(p.weight) || 0,
   }));
   return json_({ success: true, prizes: prizes });
 }
@@ -462,11 +463,18 @@ function handleSavePrizes_(payload) {
 
   const sheet = sheet_(SHEET_PRIZES);
   sheet.clear();
-  sheet.appendRow(["name", "qty", "active", "tier", "updatedAt"]);
+  sheet.appendRow(["name", "qty", "active", "tier", "weight", "updatedAt"]);
 
   const now = new Date();
   (payload.prizes || []).forEach((p) => {
-    sheet.appendRow([p.name, p.qty, p.active !== false, p.tier === "main" ? "main" : "regular", now]);
+    sheet.appendRow([
+      p.name,
+      p.qty,
+      p.active !== false,
+      p.tier === "main" ? "main" : "regular",
+      p.weight === undefined ? 1 : Math.max(0, Number(p.weight) || 0),
+      now,
+    ]);
   });
 
   return json_({ success: true });
@@ -644,7 +652,7 @@ function setupAllSheets() {
   createSheetIfMissing_(ss, SHEET_SPINS, [
     "id", "outletId", "baId", "prize", "outcome", "date",
   ]);
-  createSheetIfMissing_(ss, SHEET_PRIZES, ["name", "qty", "active", "tier", "updatedAt"]);
+  createSheetIfMissing_(ss, SHEET_PRIZES, ["name", "qty", "active", "tier", "weight", "updatedAt"]);
   createSheetIfMissing_(ss, SHEET_SETTINGS, ["key", "value"]);
   createSheetIfMissing_(ss, SHEET_CITIES, ["name", "active", "updatedAt"]);
 
@@ -730,17 +738,18 @@ function seedPrizesIfEmpty_() {
 
   // [name, qty, active, tier] — tier is "regular" (common, high odds) or
   // "main" (rare, low odds, gets the full name+phone winner registration).
+  // [name, qty, active, tier, weight] — weight is the relative chance.
   const fallback = [
-    ["Keychain", 10, true, "regular"],
-    ["1 Bottle", 10, true, "regular"],
-    ["2 Bottles", 5, true, "regular"],
-    ["3 Bottles", 3, true, "regular"],
-    ["Cap", 5, true, "regular"],
-    ["Bottle Opener", 10, true, "regular"],
-    ["Umbrella", 3, true, "regular"],
-    ["Glass", 5, true, "regular"],
-    ["T-Shirt", 1, true, "main"],
+    ["Keychain", 10, true, "regular", 20],
+    ["1 Bottle", 10, true, "regular", 20],
+    ["2 Bottles", 5, true, "regular", 10],
+    ["3 Bottles", 3, true, "regular", 5],
+    ["Cap", 5, true, "regular", 10],
+    ["Bottle Opener", 10, true, "regular", 20],
+    ["Umbrella", 3, true, "regular", 5],
+    ["Glass", 5, true, "regular", 10],
+    ["T-Shirt", 1, true, "main", 1],
   ];
   const now = new Date();
-  fallback.forEach((p) => sheet.appendRow([p[0], p[1], p[2], p[3], now]));
+  fallback.forEach((p) => sheet.appendRow([p[0], p[1], p[2], p[3], p[4], now]));
 }

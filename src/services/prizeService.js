@@ -6,15 +6,15 @@ const CACHE_TIME_KEY = "feta_prize_list_saved_at";
 /* A list to fall back on if the sheet has never been filled in and the
    phone has no cached copy yet. Matches what the app shipped with. */
 export const FALLBACK_PRIZES = [
-  { name: "Keychain", qty: 10, active: true, tier: "regular" },
-  { name: "1 Bottle", qty: 10, active: true, tier: "regular" },
-  { name: "2 Bottles", qty: 5, active: true, tier: "regular" },
-  { name: "3 Bottles", qty: 3, active: true, tier: "regular" },
-  { name: "Cap", qty: 5, active: true, tier: "regular" },
-  { name: "Bottle Opener", qty: 10, active: true, tier: "regular" },
-  { name: "Umbrella", qty: 3, active: true, tier: "regular" },
-  { name: "Glass", qty: 5, active: true, tier: "regular" },
-  { name: "T-Shirt", qty: 1, active: true, tier: "main" },
+  { name: "Keychain", qty: 10, active: true, tier: "regular", weight: 20 },
+  { name: "1 Bottle", qty: 10, active: true, tier: "regular", weight: 20 },
+  { name: "2 Bottles", qty: 5, active: true, tier: "regular", weight: 10 },
+  { name: "3 Bottles", qty: 3, active: true, tier: "regular", weight: 5 },
+  { name: "Cap", qty: 5, active: true, tier: "regular", weight: 10 },
+  { name: "Bottle Opener", qty: 10, active: true, tier: "regular", weight: 20 },
+  { name: "Umbrella", qty: 3, active: true, tier: "regular", weight: 5 },
+  { name: "Glass", qty: 5, active: true, tier: "regular", weight: 10 },
+  { name: "T-Shirt", qty: 1, active: true, tier: "main", weight: 1 },
 ];
 
 function normalise(list) {
@@ -26,6 +26,7 @@ function normalise(list) {
       qty: Math.max(0, Number(p.qty) || 0),
       active: p.active !== false && String(p.active).toLowerCase() !== "false",
       tier: p.tier === "main" ? "main" : "regular",
+      weight: p.weight === undefined || p.weight === "" ? 1 : Math.max(0, Number(p.weight) || 0),
     }));
 }
 

@@ -139,7 +139,10 @@ export default function SpinWheelPage() {
     { bg: FETA.amber, fg: FETA.ink },
     { bg: FETA.redDeep, fg: FETA.cream },
   ];
-  const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
+  /* How likely "No Win" is, relative to the prize weights set in admin. */
+const NO_WIN_WEIGHT = 2;
+
+const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
 
   useEffect(() => {
     const updateSize = () => {
@@ -204,6 +207,7 @@ export default function SpinWheelPage() {
         label: item.name,
         qty: item.qty,
         tier: item.tier === "main" ? "main" : "regular",
+        weight: item.weight === undefined ? 1 : Number(item.weight),
         startFrac: acc,
         endFrac: acc + frac,
         midFrac: acc + frac / 2,
@@ -213,6 +217,36 @@ export default function SpinWheelPage() {
       acc += frac;
     });
     return slices;
+  }
+
+  /* Slices are drawn equal so the wheel looks balanced, but the odds come
+     from each prize's admin-set weight. We pick the winner first, then
+     spin so the pointer genuinely lands on that slice — the animation is
+     honest about the result, it just isn't uniform across slices. */
+  function pickWeighted(slices) {
+    const weights = slices.map((sl) => {
+      if (sl.isNoWin) return NO_WIN_WEIGHT;
+      const w = Number(sl.weight);
+      return isNaN(w) || w < 0 ? 0 : w;
+    });
+
+    const total = weights.reduce((a, b) => a + b, 0);
+    if (total <= 0) return Math.floor(Math.random() * slices.length);
+
+    let roll = Math.random() * total;
+    for (let i = 0; i < slices.length; i++) {
+      roll -= weights[i];
+      if (roll < 0) return i;
+    }
+    return slices.length - 1;
+  }
+
+  /* Rotation that puts the given slice under the pointer, landing a
+     little off-centre so it doesn't stop dead centre every time. */
+  function degreesForSlice(sl) {
+    const span = sl.endFrac - sl.startFrac;
+    const target = sl.startFrac + span * (0.25 + Math.random() * 0.5);
+    return (360 - target * 360) % 360;
   }
 
   function readPointer(slices, deg) {
@@ -427,9 +461,15 @@ export default function SpinWheelPage() {
     const slices = buildSlices(campaign);
     lastTickIdxRef.current = sliceIndexAt(slices, wheelDegRef.current);
 
-    const extraDeg = 360 * 6 + Math.random() * 360 * 3;
-    const finalDeg = wheelDegRef.current + extraDeg;
-    const startDeg = wheelDegRef.current;
+    const targetIdx = pickWeighted(slices);
+    const targetDeg = degreesForSlice(slices[targetIdx]);
+
+    /* Spin several full turns, then settle on the chosen slice. */
+    const current = wheelDegRef.current;
+    const turns = 6 + Math.floor(Math.random() * 3);
+    const base = current + turns * 360;
+    const finalDeg = base + ((targetDeg - (base % 360)) + 360) % 360;
+    const startDeg = current;
     const startTime = performance.now();
     const duration = 4500;
     const easeOut = (t) => 1 - Math.pow(1 - t, 4.5);
