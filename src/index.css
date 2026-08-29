@@ -203,9 +203,9 @@ select.feta-field {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* The prize celebration opts out — see the reduced-motion block further
-     down, which gives it a calm fade instead of nothing at all. */
-  *:not(.feta-bottle-solo):not(.feta-cheers-left):not(.feta-cheers-right):not(.feta-cheers-centre):not(.feta-bottle-glow),
+  /* The prize celebration is excluded on purpose — see the note by the
+     celebration keyframes. Everything else respects the preference. */
+  *:not(.feta-bottle-solo):not(.feta-cheers-left):not(.feta-cheers-right):not(.feta-cheers-centre):not(.feta-bottle-glow):not(.feta-clink-spark),
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
@@ -574,38 +574,12 @@ select.feta-field {
   animation: feta-bottle-glow 1.2s ease-out backwards;
 }
 
-/* Reduced motion — which Android's Battery Saver and iOS's Reduce Motion
-   both trigger — must not leave the prize reveal blank. The swinging and
-   clinking stop; a calm fade and the resting tilt remain, so the win
-   still reads. */
-@media (prefers-reduced-motion: reduce) {
-  .feta-bottle-solo,
-  .feta-cheers-centre {
-    animation: feta-gentle-in 0.45s ease-out backwards !important;
-  }
-  .feta-cheers-left {
-    animation: feta-gentle-in 0.45s ease-out backwards !important;
-    transform: rotate(11deg);
-  }
-  .feta-cheers-right {
-    animation: feta-gentle-in 0.45s ease-out backwards !important;
-    transform: rotate(-11deg);
-  }
-  .feta-bottle-glow {
-    animation: feta-gentle-in 0.45s ease-out backwards !important;
-    opacity: 0.55;
-  }
-  .feta-clink-spark {
-    animation: none !important;
-    opacity: 0;
-  }
-}
+/* The prize reveal deliberately keeps animating under reduced motion.
 
-@keyframes feta-gentle-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
+   This plays for a consumer standing at the outlet, on the BA's phone —
+   and Android's Battery Saver switches reduced motion on by itself. A BA
+   saving battery shouldn't silently downgrade what every customer sees.
+   The animation is short, contained, and never loops aggressively, so
+   the accessibility cost is small and the reveal is the whole point.
+
+   Everything else in the app still respects the preference. */
