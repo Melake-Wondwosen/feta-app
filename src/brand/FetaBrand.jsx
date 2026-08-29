@@ -223,7 +223,11 @@ export function Screen({ children, rays = true, trim = true, fullWidth = false }
             top: "-40%",
             left: "50%",
             width: "190%",
-            height: "190%",
+            /* Sized against the viewport, not the container. A percentage
+               height here feeds back into the container's own auto height
+               and stretches the page far past its content. */
+            height: "190vh",
+            maxHeight: "190vh",
             transform: "translateX(-50%)",
             transformOrigin: "center",
           }}

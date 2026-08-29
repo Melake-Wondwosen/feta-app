@@ -49,6 +49,14 @@ body,
   margin: 0;
 }
 
+/* The decorative sunburst is absolutely positioned and oversized. Without
+   this, its height resolves against an auto-height ancestor and stretches
+   the page well past its actual content. */
+#root {
+  position: relative;
+  overflow-x: hidden;
+}
+
 body {
   background: var(--feta-red-dark);
   color: var(--feta-cream);
