@@ -599,3 +599,110 @@ select.feta-field {
    the accessibility cost is small and the reveal is the whole point.
 
    Everything else in the app still respects the preference. */
+
+/* ---------- SOFT RELIEF (neumorphic) ----------
+   Neumorphism only works when a surface is the same colour as
+   its ground — depth comes entirely from a light source above
+   left and a shadow below right. That rules out the red
+   gradient, so this theme lays a warm cream ground and uses
+   Feta red as the single accent.
+   ------------------------------------------------------------ */
+[data-theme="neu"] {
+  --neu-bg: #ece2d5;
+  --neu-light: #fdf7ee;
+  --neu-dark: #c7b8a5;
+}
+
+/* data-theme sits on <html>, so this reaches <body> directly. */
+[data-theme="neu"] body {
+  background: var(--neu-bg);
+}
+
+[data-theme="neu"] .feta-screen {
+  background: var(--neu-bg) !important;
+  color: var(--feta-ink);
+}
+
+/* The sunburst and woven trims are poster devices — they fight
+   the quiet of a relief surface, so they step back sharply. */
+[data-theme="neu"] .feta-rays-turn {
+  opacity: 0.06;
+}
+[data-theme="neu"] .feta-screen > .absolute svg {
+  opacity: 0.25;
+}
+
+/* Raised: lit from the top left, shadowed to the bottom right.
+   Same fill as the ground — that's the whole trick. */
+[data-theme="neu"] .feta-lockup,
+[data-theme="neu"] .feta-lockup-sm,
+[data-theme="neu"] .feta-lockup-flat {
+  border-radius: 22px;
+  background: var(--neu-bg) !important;
+  border: none;
+  box-shadow:
+    -6px -6px 14px var(--neu-light),
+    7px 7px 16px var(--neu-dark);
+  color: var(--feta-ink) !important;
+  text-shadow: none !important;
+}
+
+/* Pressing pushes the surface into the page: the same two
+   shadows, moved inside. */
+[data-theme="neu"] .feta-press:active:not(:disabled),
+[data-theme="neu"] .feta-lockup-sm.feta-press:active:not(:disabled) {
+  transform: none;
+  box-shadow:
+    inset -5px -5px 12px var(--neu-light),
+    inset 6px 6px 14px var(--neu-dark);
+}
+
+/* Inputs are permanently pressed in — that's how neumorphism
+   signals "you can type here". */
+[data-theme="neu"] .feta-field {
+  border-radius: 16px;
+  background: var(--neu-bg) !important;
+  border: none;
+  box-shadow:
+    inset -4px -4px 10px var(--neu-light),
+    inset 5px 5px 12px var(--neu-dark);
+  color: var(--feta-ink) !important;
+}
+[data-theme="neu"] .feta-field::placeholder {
+  color: rgba(23, 17, 15, 0.35);
+}
+[data-theme="neu"] .feta-field:focus-visible {
+  box-shadow:
+    inset -4px -4px 10px var(--neu-light),
+    inset 5px 5px 12px var(--neu-dark),
+    0 0 0 2px var(--feta-red);
+}
+[data-theme="neu"] select.feta-field {
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--feta-red) 50%),
+    linear-gradient(135deg, var(--feta-red) 50%, transparent 50%);
+}
+
+/* Red is the one accent, used on type rather than as fill. */
+[data-theme="neu"] .feta-eyebrow {
+  color: var(--feta-red) !important;
+  letter-spacing: 0.16em;
+}
+[data-theme="neu"] .feta-display {
+  color: var(--feta-ink) !important;
+}
+/* Amber call-to-action surfaces keep a tint, but still in relief. */
+[data-theme="neu"] .feta-lockup[style*="rgb(251, 177, 92)"],
+[data-theme="neu"] .feta-lockup-sm[style*="rgb(251, 177, 92)"] {
+  background: var(--neu-bg) !important;
+}
+[data-theme="neu"] .feta-lockup[style*="rgb(251, 177, 92)"] .feta-display {
+  color: var(--feta-red) !important;
+}
+
+[data-theme="neu"] .feta-scroll {
+  scrollbar-color: var(--neu-dark) transparent;
+}
+[data-theme="neu"] .feta-scroll::-webkit-scrollbar-thumb {
+  background: var(--neu-dark);
+}

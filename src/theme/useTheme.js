@@ -13,6 +13,11 @@ export const THEMES = [
     blurb: "Enamel signage on a brass frame, lit from above",
   },
   {
+    key: "neu",
+    name: "Soft relief",
+    blurb: "Warm cream surfaces pressed in and out of the page",
+  },
+  {
     key: "glass",
     name: "Smoked glass",
     blurb: "Translucent panels, the sunburst showing through",

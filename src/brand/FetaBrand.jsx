@@ -209,7 +209,7 @@ export function FetaMark({ className = "", alt = "Feta", style }) {
 export function Screen({ children, rays = true, trim = true, fullWidth = false }) {
   return (
     <div
-      className={`relative min-h-screen ${fullWidth ? "" : "max-w-md"} mx-auto overflow-hidden flex flex-col`}
+      className={`feta-screen relative min-h-screen ${fullWidth ? "" : "max-w-md"} mx-auto overflow-hidden flex flex-col`}
       style={{
         background: `radial-gradient(120% 80% at 50% 0%, ${FETA.red} 0%, ${FETA.redDeep} 55%, ${FETA.redDark} 100%)`,
       }}
