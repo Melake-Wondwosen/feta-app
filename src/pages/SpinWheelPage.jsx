@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { FETA, FetaMark, Sunburst, TibebBand } from "../brand/FetaBrand";
 import { API_URL } from "../config";
-import { getWinMessage, fillTemplate } from "../services/settingsService";
+import { getWinMessage, fillTemplate, getSettings } from "../services/settingsService";
 import { logSpin } from "../services/statsService";
 import {
   bottleCost,
@@ -52,12 +52,19 @@ export default function SpinWheelPage() {
   const [drawError, setDrawError] = useState("");
   const [regularWinOverlay, setRegularWinOverlay] = useState(null);
   const [bottlePool, setBottlePool] = useState(() => readPool(id));
+  const [noWinWeight, setNoWinWeight] = useState(DEFAULT_NO_WIN_WEIGHT);
   const [winMessage, setWinMessage] = useState(
     "Congratulations! You've won {prize} 🎉"
   );
 
   useEffect(() => {
     getWinMessage().then(setWinMessage);
+    getSettings()
+      .then((cfg) => {
+        const w = Number(cfg?.noWinWeight);
+        if (isFinite(w) && w >= 0) setNoWinWeight(w);
+      })
+      .catch(() => {});
   }, []);
 
   const canvasRef = useRef(null);
@@ -147,7 +154,7 @@ export default function SpinWheelPage() {
     { bg: FETA.redDeep, fg: FETA.cream },
   ];
   /* How likely "No Win" is, relative to the prize weights set in admin. */
-const NO_WIN_WEIGHT = 2;
+const DEFAULT_NO_WIN_WEIGHT = 2;
 
 const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
 
@@ -207,6 +214,10 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
       return bottlePool >= cost;
     });
 
+    /* If nothing is left to give away, a wheel showing only "No Win"
+       is worse than no wheel — the caller handles the empty case. */
+    if (affordable.length === 0) return [];
+
     const all = [
       ...affordable.map((x, i) => ({ ...x, colorIdx: i, isNoWin: false })),
       { name: "No Win", qty: 2, colorIdx: -1, isNoWin: true },
@@ -241,7 +252,7 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
      honest about the result, it just isn't uniform across slices. */
   function pickWeighted(slices) {
     const weights = slices.map((sl) => {
-      if (sl.isNoWin) return NO_WIN_WEIGHT;
+      if (sl.isNoWin) return noWinWeight;
       const w = Number(sl.weight);
       return isNaN(w) || w < 0 ? 0 : w;
     });
@@ -482,8 +493,10 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
     }
   };
 
+  const outOfStock = campaign.length > 0 && buildSlices(campaign).length === 0;
+
   const spin = () => {
-    if (spinning || campaign.length === 0) return;
+    if (spinning || campaign.length === 0 || outOfStock) return;
     ensureAudio();
     setSpinning(true);
     setWinner(null);
@@ -778,7 +791,7 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
         <div className="p-5 flex-none">
           <button
             onClick={spin}
-            disabled={spinning}
+            disabled={spinning || outOfStock}
             className="feta-lockup feta-press feta-display w-full disabled:opacity-45"
             style={{
               height: Math.max(52, wheelSize * 0.11),
@@ -788,7 +801,11 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
               letterSpacing: "0.08em",
             }}
           >
-            {spinning ? "Spinning…" : "Spin the wheel"}
+            {spinning
+              ? "Spinning…"
+              : outOfStock
+              ? "Everything has been given away"
+              : "Spin the wheel"}
           </button>
         </div>
       </div>

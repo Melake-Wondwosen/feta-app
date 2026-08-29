@@ -9,6 +9,7 @@ import {
 } from "../brand/FetaBrand";
 import { useAuth } from "../context/AuthContext";
 import PageHeader from "../components/PageHeader";
+import { getSettings, saveSettings } from "../services/settingsService";
 import {
   getPrizes,
   savePrizes,
@@ -24,6 +25,7 @@ export default function AdminPrizesPage() {
   const [prizes, setPrizes] = useState([]);
   const [newName, setNewName] = useState("");
   const [password, setPassword] = useState("");
+  const [noWinWeight, setNoWinWeight] = useState(2);
 
 
   const [loading, setLoading] = useState(true);
@@ -31,6 +33,15 @@ export default function AdminPrizesPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    getSettings()
+      .then((cfg) => {
+        const w = Number(cfg?.noWinWeight);
+        if (isFinite(w) && w >= 0) setNoWinWeight(w);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     let live = true;
@@ -113,6 +124,11 @@ export default function AdminPrizesPage() {
     try {
       setSaving(true);
       await savePrizes(prizes, user?.username, password.trim());
+      await saveSettings(
+        { noWinWeight: String(Number(noWinWeight) || 0) },
+        user?.username,
+        password.trim()
+      );
       setDirty(false);
       setPassword("");
       setNotice(
@@ -130,7 +146,7 @@ export default function AdminPrizesPage() {
   /* Live odds so the weights mean something concrete. Only active
      prizes compete, and the wheel's built-in "No Win" slice is counted
      too, so these match what a consumer actually experiences. */
-  const NO_WIN_WEIGHT = 2;
+  const NO_WIN_WEIGHT = Number(noWinWeight) || 0;
   const totalWeight =
     prizes
       .filter((p) => p.active)
@@ -327,6 +343,43 @@ export default function AdminPrizesPage() {
             >
               Add
             </button>
+          </div>
+        </div>
+
+        {/* No Win */}
+        <div className="mt-8">
+          <SectionLabel>Chance of winning nothing</SectionLabel>
+          <div
+            className="feta-lockup-flat p-4"
+            style={{ background: FETA.cream, color: FETA.ink }}
+          >
+            <div className="flex items-center gap-3">
+              <span className="feta-eyebrow" style={{ color: FETA.redDeep }}>
+                No Win
+              </span>
+              <input
+                type="number"
+                min="0"
+                value={noWinWeight}
+                onChange={(e) => {
+                  setNoWinWeight(e.target.value);
+                  setDirty(true);
+                }}
+                aria-label="Chance weight for winning nothing"
+                className="feta-field w-20 !py-2 text-center"
+              />
+              <span className="text-xs font-bold" style={{ color: FETA.redDeep }}>
+                {totalWeight > 0
+                  ? `${Math.round((NO_WIN_WEIGHT / totalWeight) * 100)}%`
+                  : "—"}
+              </span>
+            </div>
+            <p
+              className="text-xs font-semibold mt-2"
+              style={{ color: `${FETA.ink}88` }}
+            >
+              Set to 0 and every spin wins something.
+            </p>
           </div>
         </div>
 
