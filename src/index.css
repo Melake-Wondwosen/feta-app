@@ -211,3 +211,118 @@ select.feta-field {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================
+   THEMES
+   The default look is the poster/lockup construction above.
+   These two alternatives re-skin the same shared surface
+   classes, so no page markup has to change. Some components
+   set a background inline, so the surface rules here use
+   !important to win — that's deliberate, not sloppy.
+   ============================================================ */
+
+/* ---------- SKEUOMORPHIC ----------
+   Physical materials: bevelled edges, inner highlights, a
+   light source from above, and soft cast shadows. */
+[data-theme="skeuo"] .feta-lockup,
+[data-theme="skeuo"] .feta-lockup-sm,
+[data-theme="skeuo"] .feta-lockup-flat {
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.22),
+    0 1px 0 rgba(255, 255, 255, 0.25),
+    0 3px 5px rgba(0, 0, 0, 0.35),
+    0 10px 18px rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 255, 255, 0) 45%,
+    rgba(0, 0, 0, 0.09) 100%
+  );
+}
+
+[data-theme="skeuo"] .feta-press:active:not(:disabled),
+[data-theme="skeuo"] .feta-lockup-sm.feta-press:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.45),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.3);
+  background-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.14) 0%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
+}
+
+[data-theme="skeuo"] .feta-field {
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.5),
+    0 1px 0 rgba(255, 255, 255, 0.22);
+}
+[data-theme="skeuo"] .feta-field:focus-visible {
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.28),
+    0 0 0 3px var(--feta-amber);
+}
+
+/* ---------- GLASSMORPHIC ----------
+   Frosted panels over the red ground: translucent fills, a
+   bright hairline edge, and a blur behind. */
+[data-theme="glass"] .feta-lockup,
+[data-theme="glass"] .feta-lockup-sm,
+[data-theme="glass"] .feta-lockup-flat {
+  border-radius: 22px;
+  background: rgba(255, 244, 228, 0.16) !important;
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 244, 228, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 8px 32px rgba(0, 0, 0, 0.32);
+  color: var(--feta-cream) !important;
+}
+
+/* Text inside a frosted panel has to lift off the red ground. */
+[data-theme="glass"] .feta-lockup *,
+[data-theme="glass"] .feta-lockup-sm *,
+[data-theme="glass"] .feta-lockup-flat * {
+  color: var(--feta-cream) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="glass"] .feta-press:active:not(:disabled),
+[data-theme="glass"] .feta-lockup-sm.feta-press:active:not(:disabled) {
+  transform: scale(0.985);
+  background: rgba(255, 244, 228, 0.26) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="glass"] .feta-field {
+  border-radius: 14px;
+  background: rgba(255, 244, 228, 0.14) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 244, 228, 0.38);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  color: var(--feta-cream) !important;
+}
+[data-theme="glass"] .feta-field::placeholder {
+  color: rgba(255, 244, 228, 0.6);
+}
+[data-theme="glass"] .feta-field:focus-visible {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 0 3px var(--feta-amber);
+}
+[data-theme="glass"] select.feta-field {
+  background-image: linear-gradient(45deg, transparent 50%, var(--feta-cream) 50%),
+    linear-gradient(135deg, var(--feta-cream) 50%, transparent 50%);
+}

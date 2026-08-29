@@ -201,6 +201,12 @@ export default function HomePage() {
                   blurb: "Usernames, passwords and roles",
                 },
                 {
+                  to: "/admin/theme",
+                  icon: "🎨",
+                  title: "Appearance",
+                  blurb: "Switch the app's look for everyone",
+                },
+                {
                   to: "/admin/analytics",
                   icon: "📊",
                   title: "National analytics",

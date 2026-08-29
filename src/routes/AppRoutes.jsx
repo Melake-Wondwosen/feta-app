@@ -16,6 +16,7 @@ import ManagerDashboardPage from "../pages/ManagerDashboardPage";
 import AdminHubPage from "../pages/AdminHubPage";
 import AdminCitiesPage from "../pages/AdminCitiesPage";
 import AdminUsersPage from "../pages/AdminUsersPage";
+import AdminThemePage from "../pages/AdminThemePage";
 
 export default function AppRoutes() {
   return (
@@ -121,6 +122,15 @@ export default function AppRoutes() {
         element={
           <AdminRoute>
             <ManagerDashboardPage national />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/theme"
+        element={
+          <AdminRoute>
+            <AdminThemePage />
           </AdminRoute>
         }
       />
