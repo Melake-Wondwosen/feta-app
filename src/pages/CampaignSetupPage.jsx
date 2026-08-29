@@ -16,6 +16,16 @@ import {
 } from "../services/prizeService";
 
 import fetaBottle from "../assets/feta-bottle.png";
+import fetaTshirt from "../assets/feta-tshirt.png";
+import fetaCap from "../assets/feta-cap.png";
+
+/* Thumbnail for a prize, when we have real product artwork for it. */
+function prizeImage(name) {
+  if (isBottlePrize(name)) return fetaBottle;
+  if (/t[\s-]?shirt/i.test(name)) return fetaTshirt;
+  if (/\bcap\b/i.test(name)) return fetaCap;
+  return null;
+}
 import {
   BOTTLES_PER_CRATE,
   isBottlePrize,
@@ -207,12 +217,12 @@ export default function CampaignSetupPage() {
                     boxShadow: `0 0 0 2px ${on ? FETA.red : FETA.gold}, 0 0 0 4px ${FETA.ink}`,
                   }}
                 >
-                  {isBottlePrize(prize) && (
+                  {prizeImage(prize) && (
                     <img
-                      src={fetaBottle}
+                      src={prizeImage(prize)}
                       alt=""
                       aria-hidden="true"
-                      className="h-7 w-auto mx-auto mb-1"
+                      className="h-7 w-auto mx-auto mb-1 object-contain"
                     />
                   )}
                   {item.tier === "main" ? "★ " : ""}
@@ -321,12 +331,12 @@ export default function CampaignSetupPage() {
                   style={{ background: FETA.cream, color: FETA.ink }}
                 >
                   <div className="flex justify-between items-center gap-3">
-                    {isBottlePrize(prize.name) && (
+                    {prizeImage(prize.name) && (
                       <img
-                        src={fetaBottle}
+                        src={prizeImage(prize.name)}
                         alt=""
                         aria-hidden="true"
-                        className="flex-none h-10 w-auto drop-shadow-[0_2px_4px_rgba(23,17,15,0.3)]"
+                        className="flex-none h-10 w-auto object-contain drop-shadow-[0_2px_4px_rgba(23,17,15,0.3)]"
                       />
                     )}
                     <h4 className="feta-display text-sm truncate flex items-center gap-1.5 flex-1">

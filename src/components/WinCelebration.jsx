@@ -1,14 +1,53 @@
 import { FETA, FetaMark } from "../brand/FetaBrand";
 import fetaBottle from "../assets/feta-bottle.png";
+import fetaTshirt from "../assets/feta-tshirt.png";
+import fetaCap from "../assets/feta-cap.png";
 import { bottleCost } from "../services/bottleStock";
 
 /* The celebration shown when a prize is won. Lives here rather than
    inside the spin screen so the admin preview renders the identical
    thing — a preview that drifts from production is worse than none. */
+/* Prizes we have real product artwork for. Matched loosely so "T-Shirt",
+   "Tshirt" and "T Shirt" all land on the same image. */
+const MERCH = [
+  { test: /t[\s-]?shirt/i, src: fetaTshirt, height: 190 },
+  { test: /\bcap\b/i, src: fetaCap, height: 150 },
+];
+
 export default function WinCelebration({ prize }) {
   const bottles = bottleCost(prize);
 
   if (bottles <= 0) {
+    const merch = MERCH.find((m) => m.test.test(String(prize || "")));
+
+    if (merch) {
+      return (
+        <div
+          className="relative flex items-center justify-center -mt-20 mb-3"
+          style={{ height: 175 }}
+        >
+          <span
+            aria-hidden="true"
+            className="feta-bottle-glow absolute left-1/2 top-1/2 rounded-full pointer-events-none"
+            style={{
+              width: 240,
+              height: 240,
+              marginLeft: -120,
+              marginTop: -120,
+              background: `radial-gradient(circle, ${FETA.amber}DD 0%, ${FETA.gold}66 42%, transparent 70%)`,
+            }}
+          />
+          <img
+            src={merch.src}
+            alt=""
+            aria-hidden="true"
+            className="feta-bottle-solo relative w-auto drop-shadow-[0_10px_18px_rgba(23,17,15,0.5)]"
+            style={{ height: merch.height }}
+          />
+        </div>
+      );
+    }
+
     return <FetaMark className="w-12 mx-auto mb-3" />;
   }
 
