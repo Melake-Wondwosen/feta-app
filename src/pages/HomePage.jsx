@@ -22,6 +22,12 @@ export default function HomePage() {
   useEffect(() => {
     if (!user) return;
 
+    /* Admins don't see the outlets list, so there's nothing to fetch. */
+    if (isAdmin(user)) {
+      setLoading(false);
+      return;
+    }
+
     const cached = localStorage.getItem(`outlets_${user.id}`);
     if (cached) setOutlets(JSON.parse(cached));
 
@@ -96,10 +102,10 @@ export default function HomePage() {
           </p>
         </div>
 
-        <SectionLabel>My outlets</SectionLabel>
+        {!isAdmin(user) && <SectionLabel>My outlets</SectionLabel>}
 
         <div className="space-y-4">
-          {loading && (
+          {!isAdmin(user) && loading && (
             <p
               className="text-center py-6 text-sm font-semibold"
               style={{ color: `${FETA.cream}99` }}
@@ -108,7 +114,7 @@ export default function HomePage() {
             </p>
           )}
 
-          {!loading && outlets.length === 0 && (
+          {!isAdmin(user) && !loading && outlets.length === 0 && (
             <div
               className="feta-lockup-flat text-center py-7 px-5"
               style={{ background: `${FETA.redDark}CC` }}
@@ -122,7 +128,7 @@ export default function HomePage() {
             </div>
           )}
 
-          {outlets.map((outlet) => (
+          {!isAdmin(user) && outlets.map((outlet) => (
             <button
               key={outlet.id}
               onClick={() => openOutlet(outlet)}
