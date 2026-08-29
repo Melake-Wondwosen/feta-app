@@ -110,9 +110,14 @@ function handleLogin_(e) {
   const username = String(e.parameter.username || "").trim();
   const password = String(e.parameter.password || "");
 
+  /* BAs type these on phone keyboards in the field, where autocapitalise
+     and a stray caps lock cause most failed logins. Both are compared
+     case-insensitively so a wrong shift key never locks anyone out. */
   const users = rowsToObjects_(sheet_(SHEET_USERS));
   const match = users.find(
-    (u) => String(u.username).trim() === username && String(u.password) === password
+    (u) =>
+      String(u.username).trim().toLowerCase() === username.toLowerCase() &&
+      String(u.password).trim().toLowerCase() === password.trim().toLowerCase()
   );
 
   if (!match) {
@@ -320,10 +325,13 @@ function authorisePublish_(payload) {
 
   const users = rowsToObjects_(sheet_(SHEET_USERS));
   const match = users.find(function (u) {
-    return String(u.username).trim() === username;
+    return String(u.username).trim().toLowerCase() === username.toLowerCase();
   });
 
-  if (!match || String(match.password) !== password) {
+  if (
+    !match ||
+    String(match.password).trim().toLowerCase() !== password.trim().toLowerCase()
+  ) {
     return { ok: false, message: "That password isn't right." };
   }
 
