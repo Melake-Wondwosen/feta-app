@@ -15,6 +15,13 @@ import {
   FALLBACK_PRIZES,
 } from "../services/prizeService";
 
+import {
+  BOTTLES_PER_CRATE,
+  isBottlePrize,
+  cratesToBottles,
+  writePool,
+} from "../services/bottleStock";
+
 export default function CampaignSetupPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,6 +30,7 @@ export default function CampaignSetupPage() {
 
   const [prizes, setPrizes] = useState([]);
   const [customPrize, setCustomPrize] = useState("");
+  const [crates, setCrates] = useState("");
 
   /* The catalogue comes from the sheet, so an admin can change what
      every BA sees without shipping a new build. Cached on the phone so
@@ -93,11 +101,23 @@ export default function CampaignSetupPage() {
       alert("Add at least one prize before starting.");
       return;
     }
+    if (prizes.some((p) => isBottlePrize(p.name))) {
+      const bottles = cratesToBottles(crates);
+      if (bottles <= 0) {
+        alert("Enter how many crates of beer you have for this outlet.");
+        return;
+      }
+      writePool(outlet.id, bottles);
+    }
+
     localStorage.setItem(`campaign_${outlet.id}`, JSON.stringify(prizes));
     navigate(`/spin/${outlet.id}`, { state: { outlet } });
   };
 
   const isSelected = (name) => prizes.some((p) => p.name === name);
+
+  const hasBeer = prizes.some((p) => isBottlePrize(p.name));
+  const bottleTotal = cratesToBottles(crates);
 
   return (
     <div
@@ -194,6 +214,48 @@ export default function CampaignSetupPage() {
           </div>
         </div>
 
+        {/* Beer stock — one number covers every bottle prize */}
+        {hasBeer && (
+          <div>
+            <SectionLabel>Beer stock</SectionLabel>
+            <div
+              className="feta-lockup-flat p-4"
+              style={{ background: FETA.cream, color: FETA.ink }}
+            >
+              <label
+                className="feta-eyebrow block mb-2"
+                style={{ color: FETA.redDeep }}
+              >
+                Crates for this outlet
+              </label>
+              <input
+                type="number"
+                min="1"
+                inputMode="numeric"
+                value={crates}
+                onChange={(e) => setCrates(e.target.value)}
+                placeholder="e.g. 5"
+                className="feta-field !py-2.5"
+              />
+              <p
+                className="text-sm font-bold mt-3"
+                style={{ color: bottleTotal > 0 ? FETA.redDeep : `${FETA.ink}77` }}
+              >
+                {bottleTotal > 0
+                  ? `${bottleTotal} bottles available (${BOTTLES_PER_CRATE} per crate)`
+                  : `Each crate is ${BOTTLES_PER_CRATE} bottles.`}
+              </p>
+              <p
+                className="text-xs font-semibold mt-2"
+                style={{ color: `${FETA.ink}88` }}
+              >
+                One, two and three bottle wins all come out of this total. A
+                prize drops off the wheel once there aren't enough left.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Custom prize */}
         <div>
           <SectionLabel>Something else</SectionLabel>
@@ -263,19 +325,28 @@ export default function CampaignSetupPage() {
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-3 mt-3">
-                    <span className="feta-eyebrow" style={{ color: FETA.redDeep }}>
-                      Quantity
-                    </span>
-                    <input
-                      type="number"
-                      min="1"
-                      value={prize.qty}
-                      onChange={(e) => updateQty(index, e.target.value)}
-                      aria-label={`Quantity of ${prize.name}`}
-                      className="feta-field flex-1 !py-2 text-center"
-                    />
-                  </div>
+                  {isBottlePrize(prize.name) ? (
+                    <p
+                      className="text-xs font-semibold mt-3"
+                      style={{ color: `${FETA.ink}99` }}
+                    >
+                      Drawn from your beer crates below.
+                    </p>
+                  ) : (
+                    <div className="flex items-center gap-3 mt-3">
+                      <span className="feta-eyebrow" style={{ color: FETA.redDeep }}>
+                        Quantity
+                      </span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={prize.qty}
+                        onChange={(e) => updateQty(index, e.target.value)}
+                        aria-label={`Quantity of ${prize.name}`}
+                        className="feta-field flex-1 !py-2 text-center"
+                      />
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-3 mt-3">
                     <span className="feta-eyebrow" style={{ color: FETA.redDeep }}>

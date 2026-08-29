@@ -4,6 +4,12 @@ import { FETA, FetaMark, Sunburst, TibebBand } from "../brand/FetaBrand";
 import { API_URL } from "../config";
 import { getWinMessage, fillTemplate } from "../services/settingsService";
 import { logSpin } from "../services/statsService";
+import {
+  bottleCost,
+  isBottlePrize,
+  readPool,
+  writePool,
+} from "../services/bottleStock";
 import { useAuth } from "../context/AuthContext";
 
 /* Fit a label into at most two lines within the available width. */
@@ -45,6 +51,7 @@ export default function SpinWheelPage() {
   const [wheelSize, setWheelSize] = useState(300);
   const [drawError, setDrawError] = useState("");
   const [regularWinOverlay, setRegularWinOverlay] = useState(null);
+  const [bottlePool, setBottlePool] = useState(() => readPool(id));
   const [winMessage, setWinMessage] = useState(
     "Congratulations! You've won {prize} 🎉"
   );
@@ -191,8 +198,17 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
   }, [campaign, wheelSize]);
 
   function buildSlices(items) {
+    /* A bottle prize only stays on the wheel while the shared beer pool
+       can still cover it — no offering "3 Bottles" with 2 left. */
+    const affordable = items.filter((x) => {
+      const cost = bottleCost(x.name);
+      if (cost === 0) return true;
+      if (bottlePool === null) return true; // beer not tracked here
+      return bottlePool >= cost;
+    });
+
     const all = [
-      ...items.map((x, i) => ({ ...x, colorIdx: i, isNoWin: false })),
+      ...affordable.map((x, i) => ({ ...x, colorIdx: i, isNoWin: false })),
       { name: "No Win", qty: 2, colorIdx: -1, isNoWin: true },
     ];
 
@@ -416,13 +432,28 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
     ctx.fill();
   }
 
+  /* Beer comes out of the shared crate pool. Called for any beer win,
+     regular or main, since a main-tier bottle prize skips the regular
+     path entirely. */
+  const deductBottles = (prizeName) => {
+    const cost = bottleCost(prizeName);
+    if (cost <= 0 || bottlePool === null) return;
+    const left = Math.max(0, bottlePool - cost);
+    setBottlePool(left);
+    writePool(id, left);
+  };
+
   const recordRegularWin = async (result) => {
     setCampaign((prev) => {
       const updated = prev
         .map((item) =>
-          item.name === result.label ? { ...item, qty: item.qty - 1 } : item
+          /* Beer isn't stocked per prize line — the pool governs it — so
+             only non-beer prizes decrement their own quantity. */
+          item.name === result.label && !isBottlePrize(item.name)
+            ? { ...item, qty: item.qty - 1 }
+            : item
         )
-        .filter((item) => item.qty > 0);
+        .filter((item) => isBottlePrize(item.name) || item.qty > 0);
       localStorage.setItem(`campaign_${id}`, JSON.stringify(updated));
       return updated;
     });
@@ -509,6 +540,7 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
         playNoWinTone();
       } else {
         playWinChime();
+        deductBottles(result.label);
         if (result.tier === "main") {
           setTimeout(() => {
             navigate("/winner-register", {
