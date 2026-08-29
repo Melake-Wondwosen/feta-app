@@ -7,6 +7,8 @@ import {
   Screen,
   SectionLabel,
 } from "../brand/FetaBrand";
+import { useAuth } from "../context/AuthContext";
+import { getCities, saveCities } from "../services/cityService";
 import {
   getPrizes,
   savePrizes,
@@ -15,22 +17,26 @@ import {
   FALLBACK_PRIZES,
 } from "../services/prizeService";
 
-const ADMIN_KEY_STORE = "feta_admin_key";
-
 export default function AdminPrizesPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [prizes, setPrizes] = useState([]);
   const [newName, setNewName] = useState("");
-  const [adminKey, setAdminKey] = useState(
-    () => sessionStorage.getItem(ADMIN_KEY_STORE) || ""
-  );
+  const [password, setPassword] = useState("");
+
+  const [cities, setCities] = useState([]);
+  const [newCity, setNewCity] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    getCities().then(setCities).catch(() => {});
+  }, []);
 
   useEffect(() => {
     let live = true;
@@ -100,8 +106,8 @@ export default function AdminPrizesPage() {
     setError("");
     setNotice("");
 
-    if (!adminKey.trim()) {
-      setError("Enter the admin key to save.");
+    if (!password.trim()) {
+      setError("Enter your password to publish.");
       return;
     }
 
@@ -112,11 +118,12 @@ export default function AdminPrizesPage() {
 
     try {
       setSaving(true);
-      await savePrizes(prizes, adminKey.trim());
-      sessionStorage.setItem(ADMIN_KEY_STORE, adminKey.trim());
+      await savePrizes(prizes, user?.username, password.trim());
+      await saveCities(cities, user?.username, password.trim());
       setDirty(false);
+      setPassword("");
       setNotice(
-        "Saved. BAs will see this list the next time they open a campaign setup screen."
+        "Published. BAs will see the new prizes and cities next time they open a setup screen."
       );
     } catch (err) {
       setError(err.message);
@@ -303,19 +310,95 @@ export default function AdminPrizesPage() {
           </div>
         </div>
 
+        {/* Cities */}
+        <div className="mt-8">
+          <SectionLabel>Cities</SectionLabel>
+          <p
+            className="text-xs font-semibold mb-3"
+            style={{ color: `${FETA.cream}99` }}
+          >
+            These are the options BAs pick from when adding an outlet.
+          </p>
+
+          <div className="space-y-2">
+            {cities.map((c, i) => (
+              <div
+                key={`${c}-${i}`}
+                className="feta-lockup-flat flex items-center gap-2 px-3 py-2"
+                style={{ background: FETA.cream, color: FETA.ink }}
+              >
+                <input
+                  value={c}
+                  onChange={(e) => {
+                    const next = [...cities];
+                    next[i] = e.target.value;
+                    setCities(next);
+                    setDirty(true);
+                  }}
+                  aria-label={`City name ${i + 1}`}
+                  className="feta-field !py-2 !text-sm flex-1"
+                />
+                <button
+                  onClick={() => {
+                    setCities(cities.filter((_, idx) => idx !== i));
+                    setDirty(true);
+                  }}
+                  aria-label={`Remove ${c}`}
+                  className="feta-eyebrow px-3 py-2 rounded-md flex-none"
+                  style={{ background: FETA.red, color: FETA.cream }}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-2 mt-3">
+            <input
+              value={newCity}
+              onChange={(e) => setNewCity(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && newCity.trim()) {
+                  setCities([...cities, newCity.trim()]);
+                  setNewCity("");
+                  setDirty(true);
+                }
+              }}
+              placeholder="Add a city"
+              className="feta-field flex-1"
+            />
+            <button
+              onClick={() => {
+                if (!newCity.trim()) return;
+                setCities([...cities, newCity.trim()]);
+                setNewCity("");
+                setDirty(true);
+              }}
+              className="feta-press feta-display px-5 rounded-xl flex-none text-xs"
+              style={{
+                background: FETA.amber,
+                color: FETA.ink,
+                boxShadow: `0 0 0 2px ${FETA.gold}, 0 0 0 4px ${FETA.ink}`,
+              }}
+            >
+              Add
+            </button>
+          </div>
+        </div>
+
         {/* Save */}
         <div className="mt-8">
           <SectionLabel>Publish</SectionLabel>
 
           <label className="feta-eyebrow block mb-2" style={{ color: FETA.amber }}>
-            Admin key
+            Your password
           </label>
           <input
             type="password"
-            value={adminKey}
-            onChange={(e) => setAdminKey(e.target.value)}
-            placeholder="Required to save"
-            autoComplete="off"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder={`Confirm as ${user?.username || "you"}`}
+            autoComplete="current-password"
             className="feta-field mb-4"
           />
 

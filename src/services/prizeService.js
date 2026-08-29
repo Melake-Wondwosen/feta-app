@@ -73,7 +73,7 @@ export async function getActivePrizes() {
   return list.filter((p) => p.active);
 }
 
-export async function savePrizes(prizes, adminKey) {
+export async function savePrizes(prizes, username, password) {
   const list = normalise(prizes);
 
   if (!list.length) {
@@ -89,7 +89,7 @@ export async function savePrizes(prizes, adminKey) {
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify({ action: "savePrizes", adminKey, prizes: list }),
+    body: JSON.stringify({ action: "savePrizes", username, password, prizes: list }),
   });
 
   const text = await res.text();

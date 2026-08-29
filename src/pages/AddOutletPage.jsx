@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getDeviceId } from "../services/deviceId";
+import { getCities, FALLBACK_CITIES } from "../services/cityService";
 import { API_URL } from "../config";
 import {
   FETA,
@@ -27,22 +28,11 @@ export default function AddOutletPage() {
 
   const [loading, setLoading] = useState(false);
 
-  const cities = [
-    "Addis Ababa",
-    "Dire Dawa",
-    "Bahir Dar",
-    "Hawassa",
-    "Mekelle",
-    "Gondar",
-    "Jimma",
-    "Adama",
-    "Dessie",
-    "Jijiga",
-    "Shashamane",
-    "Hosaena",
-    "Arba Minch",
-    "Harar",
-  ];
+  const [cities, setCities] = useState(FALLBACK_CITIES);
+
+  useEffect(() => {
+    getCities().then(setCities);
+  }, []);
 
   const getLocation = () => {
     if (!navigator.geolocation) {
@@ -90,8 +80,20 @@ export default function AddOutletPage() {
       alert("Give the outlet a name.");
       return;
     }
+    if (!address.trim()) {
+      alert("Enter the address.");
+      return;
+    }
     if (!city) {
       alert("Pick a city.");
+      return;
+    }
+    if (lat === null || lng === null) {
+      alert("Capture the GPS location before saving.");
+      return;
+    }
+    if (!photo) {
+      alert("Take a photo of the outlet.");
       return;
     }
 
@@ -186,7 +188,7 @@ export default function AddOutletPage() {
         </div>
 
         {/* Photo */}
-        <SectionLabel>Outlet photo</SectionLabel>
+        <SectionLabel>Outlet photo *</SectionLabel>
         <label
           htmlFor="outlet-photo"
           className="feta-lockup flex flex-col items-center justify-center w-full h-56 overflow-hidden cursor-pointer mb-3"
@@ -252,7 +254,7 @@ export default function AddOutletPage() {
           />
 
           <input
-            placeholder="Address"
+            placeholder="Address *"
             className="feta-field"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
@@ -279,7 +281,7 @@ export default function AddOutletPage() {
           className="feta-lockup-sm feta-press w-full mt-4 py-3.5 feta-display text-xs"
           style={{ background: FETA.amber, color: FETA.ink }}
         >
-          📍 Capture GPS location
+          📍 Capture GPS location *
         </button>
 
         {lat && (

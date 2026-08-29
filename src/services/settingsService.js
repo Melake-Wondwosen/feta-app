@@ -35,13 +35,14 @@ export async function getWinMessage() {
   return (cached && cached.winMessage) || DEFAULT_WIN_MESSAGE;
 }
 
-export async function saveWinMessage(message, adminKey) {
+export async function saveWinMessage(message, username, password) {
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "text/plain" },
     body: JSON.stringify({
       action: "saveSettings",
-      adminKey,
+      username,
+      password,
       settings: { winMessage: message },
     }),
   });

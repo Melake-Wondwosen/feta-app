@@ -32,6 +32,7 @@ const SHEET_WINNERS = "Winners";
 const SHEET_PRIZES = "Prizes";
 const SHEET_SETTINGS = "Settings";
 const SHEET_SPINS = "Spins";
+const SHEET_CITIES = "Cities";
 
 function ss_() {
   return SpreadsheetApp.getActiveSpreadsheet();
@@ -67,6 +68,7 @@ function doGet(e) {
     if (action === "login") return handleLogin_(e);
     if (action === "getOutlets") return handleGetOutlets_(e);
     if (action === "getPrizes") return handleGetPrizes_(e);
+    if (action === "getCities") return handleGetCities_(e);
     if (action === "getSettings") return handleGetSettings_(e);
     if (action === "managerStats") return handleManagerStats_(e);
     if (action === "generateMyDailyPDF") return handleDailyPDF_(e);
@@ -89,6 +91,7 @@ function doPost(e) {
     if (payload.action === "addOutlet") return handleAddOutlet_(payload);
     if (payload.action === "addWinner") return handleAddWinner_(payload);
     if (payload.action === "savePrizes") return handleSavePrizes_(payload);
+    if (payload.action === "saveCities") return handleSaveCities_(payload);
     if (payload.action === "saveSettings") return handleSaveSettings_(payload);
     if (payload.action === "logSpin") return handleLogSpin_(payload);
     if (payload.action === "ping") return handlePing_(payload);
@@ -272,10 +275,8 @@ function handleGetSettings_(e) {
 }
 
 function handleSaveSettings_(payload) {
-  const adminKey = PropertiesService.getScriptProperties().getProperty("ADMIN_KEY");
-  if (!adminKey || payload.adminKey !== adminKey) {
-    return json_({ success: false, message: "Wrong admin key." });
-  }
+  const auth = authorisePublish_(payload);
+  if (!auth.ok) return json_({ success: false, message: auth.message });
 
   const sheet = sheet_(SHEET_SETTINGS);
   const rows = rowsToObjects_(sheet);
@@ -294,6 +295,74 @@ function handleSaveSettings_(payload) {
   return json_({ success: true });
 }
 
+/* Publishing (prizes, settings, cities) requires a user whose row has
+   canPublish set TRUE *and* a matching password. The canPublish flag
+   lives in the sheet so access can be granted or revoked without a code
+   change or redeploy.
+
+   Note: passwords in the Users sheet are plain text, so anyone with edit
+   access to the spreadsheet can already see them. Restrict sharing on
+   that file accordingly. */
+function authorisePublish_(payload) {
+  const username = String(payload.username || "").trim();
+  const password = String(payload.password || "");
+
+  if (!username || !password) {
+    return { ok: false, message: "Enter your username and password." };
+  }
+
+  const users = rowsToObjects_(sheet_(SHEET_USERS));
+  const match = users.find(function (u) {
+    return String(u.username).trim() === username;
+  });
+
+  if (!match || String(match.password) !== password) {
+    return { ok: false, message: "That password isn't right." };
+  }
+
+  const flag = String(match.canPublish).trim().toLowerCase();
+  if (flag !== "true" && flag !== "yes" && flag !== "1") {
+    return { ok: false, message: "This account can't publish changes." };
+  }
+
+  return { ok: true, user: match };
+}
+
+// ─── Cities ──────────────────────────────────────────────────────────
+
+function handleGetCities_(e) {
+  const rows = rowsToObjects_(sheet_(SHEET_CITIES));
+  const cities = rows
+    .filter(function (c) {
+      return (
+        String(c.name || "").trim() &&
+        String(c.active).toLowerCase() !== "false"
+      );
+    })
+    .map(function (c) {
+      return String(c.name).trim();
+    });
+
+  return json_({ success: true, cities: cities });
+}
+
+function handleSaveCities_(payload) {
+  const auth = authorisePublish_(payload);
+  if (!auth.ok) return json_({ success: false, message: auth.message });
+
+  const sheet = sheet_(SHEET_CITIES);
+  sheet.clear();
+  sheet.appendRow(["name", "active", "updatedAt"]);
+
+  const now = new Date();
+  (payload.cities || []).forEach(function (c) {
+    const name = String(c.name || "").trim();
+    if (name) sheet.appendRow([name, c.active !== false, now]);
+  });
+
+  return json_({ success: true });
+}
+
 // ─── Prizes ──────────────────────────────────────────────────────────
 
 function handleGetPrizes_(e) {
@@ -307,10 +376,8 @@ function handleGetPrizes_(e) {
 }
 
 function handleSavePrizes_(payload) {
-  const adminKey = PropertiesService.getScriptProperties().getProperty("ADMIN_KEY");
-  if (!adminKey || payload.adminKey !== adminKey) {
-    return json_({ success: false, message: "Wrong admin key." });
-  }
+  const auth = authorisePublish_(payload);
+  if (!auth.ok) return json_({ success: false, message: auth.message });
 
   const sheet = sheet_(SHEET_PRIZES);
   sheet.clear();
@@ -484,7 +551,7 @@ function onOpen() {
 function setupAllSheets() {
   const ss = ss_();
 
-  createSheetIfMissing_(ss, SHEET_USERS, ["id", "username", "password", "name", "role", "region", "lastSeen"]);
+  createSheetIfMissing_(ss, SHEET_USERS, ["id", "username", "password", "name", "role", "region", "canPublish", "lastSeen"]);
   createSheetIfMissing_(ss, SHEET_OUTLETS, [
     "id", "baId", "deviceId", "name", "address", "city",
     "latitude", "longitude", "photoUrl", "createdAt",
@@ -498,10 +565,12 @@ function setupAllSheets() {
   ]);
   createSheetIfMissing_(ss, SHEET_PRIZES, ["name", "qty", "active", "tier", "updatedAt"]);
   createSheetIfMissing_(ss, SHEET_SETTINGS, ["key", "value"]);
+  createSheetIfMissing_(ss, SHEET_CITIES, ["name", "active", "updatedAt"]);
 
   seedUsersIfEmpty_();
   seedPrizesIfEmpty_();
   seedSettingsIfEmpty_();
+  seedCitiesIfEmpty_();
 
   Logger.log("Setup complete.");
 }
@@ -543,8 +612,14 @@ function seedUsersIfEmpty_() {
   const sheet = sheet_(SHEET_USERS);
   if (sheet.getLastRow() > 1) return; // already has users
 
-  sheet.appendRow(["BA-001", "ba1", "B0lCMVyZfL", "Field BA", ""]);
-  sheet.appendRow(["ADM-001", "admin1", "2fWlxb79Ig", "Admin", "admin"]);
+  appendByHeader_(sheet, {
+    id: "BA-001", username: "ba1", password: "B0lCMVyZfL",
+    name: "Field BA", role: "", region: "", canPublish: false,
+  });
+  appendByHeader_(sheet, {
+    id: "ADM-001", username: "admin1", password: "2fWlxb79Ig",
+    name: "Admin", role: "admin", region: "", canPublish: true,
+  });
 }
 
 function seedSettingsIfEmpty_() {
@@ -552,6 +627,20 @@ function seedSettingsIfEmpty_() {
   if (sheet.getLastRow() > 1) return;
 
   sheet.appendRow(["winMessage", "Congratulations! You've won {prize} 🎉"]);
+}
+
+function seedCitiesIfEmpty_() {
+  const sheet = sheet_(SHEET_CITIES);
+  if (sheet.getLastRow() > 1) return;
+
+  const now = new Date();
+  [
+    "Addis Ababa", "Dire Dawa", "Bahir Dar", "Hawassa", "Mekelle",
+    "Gondar", "Jimma", "Adama", "Dessie", "Jijiga",
+    "Shashamane", "Hosaena", "Arba Minch", "Harar",
+  ].forEach(function (name) {
+    sheet.appendRow([name, true, now]);
+  });
 }
 
 function seedPrizesIfEmpty_() {
