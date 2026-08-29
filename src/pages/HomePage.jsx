@@ -153,7 +153,8 @@ export default function HomePage() {
             </button>
           ))}
 
-          {/* Add outlet */}
+          {/* Add outlet — field work, not an admin task */}
+          {!isAdmin(user) && (
           <button
             onClick={() => navigate("/add-outlet")}
             className="feta-press w-full rounded-2xl p-5 text-center"
@@ -169,6 +170,7 @@ export default function HomePage() {
               Register a new shop or bar
             </span>
           </button>
+          )}
 
           <div className="py-2 opacity-40">
             <TibebBand height={16} />
@@ -176,7 +178,7 @@ export default function HomePage() {
 
           {isAdmin(user) && (
           <button
-            onClick={() => navigate("/admin/prizes")}
+            onClick={() => navigate("/admin")}
             className="feta-lockup-sm feta-press w-full p-4 flex items-center justify-between gap-3"
             style={{ background: FETA.amber, color: FETA.ink }}
           >

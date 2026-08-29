@@ -9,6 +9,7 @@ import {
   TibebBand,
 } from "../brand/FetaBrand";
 import { getManagerStats } from "../services/statsService";
+import PageHeader from "../components/PageHeader";
 import { buildPresets, weeksOfMonth, describeRange } from "../services/dateRanges";
 
 const REFRESH_MS = 60000;
@@ -96,7 +97,7 @@ function StatCard({ label, value, sub, accent, star }) {
   );
 }
 
-export default function ManagerDashboardPage() {
+export default function ManagerDashboardPage({ national = false }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -114,7 +115,7 @@ export default function ManagerDashboardPage() {
     let live = true;
 
     const load = () => {
-      getManagerStats(user?.region, range.from, range.to)
+      getManagerStats(national ? "" : user?.region, range.from, range.to)
         .then((s) => {
           if (!live) return;
           setStats(s);
@@ -132,7 +133,7 @@ export default function ManagerDashboardPage() {
       live = false;
       clearInterval(timer);
     };
-  }, [user, range]);
+  }, [user, range, national]);
 
   const totalWins =
     (stats?.mainPrizeWins || 0) + (stats?.regularPrizeWins || 0);
@@ -145,20 +146,28 @@ export default function ManagerDashboardPage() {
     <Screen>
       <div className="flex flex-col flex-1 px-5 pt-8 pb-10">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-5">
-          <FetaMark className="w-12 flex-none" />
-          <div className="min-w-0 flex-1">
-            <h1
-              className="feta-display text-2xl"
-              style={{ color: FETA.cream, textShadow: `3px 3px 0 ${FETA.ink}` }}
-            >
-              {stats?.region || "Region"}
-            </h1>
-            <p className="text-xs font-bold mt-1 truncate" style={{ color: FETA.amber }}>
-              {user?.name || user?.username} · Trade marketing
-            </p>
+        {national ? (
+          <PageHeader
+            title="National analytics"
+            subtitle="Every division"
+            to="/admin"
+          />
+        ) : (
+          <div className="flex items-center gap-3 mb-5">
+            <FetaMark className="w-12 flex-none" />
+            <div className="min-w-0 flex-1">
+              <h1
+                className="feta-display text-2xl"
+                style={{ color: FETA.cream, textShadow: `3px 3px 0 ${FETA.ink}` }}
+              >
+                {stats?.region || "Region"}
+              </h1>
+              <p className="text-xs font-bold mt-1 truncate" style={{ color: FETA.amber }}>
+                {user?.name || user?.username} · Trade marketing
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Period picker — one dropdown for the day range, one for the
             week of this month. Choosing from either replaces the other. */}
@@ -370,6 +379,7 @@ export default function ManagerDashboardPage() {
           </>
         )}
 
+        {!national && (
         <button
           onClick={() => {
             logout();
@@ -380,6 +390,7 @@ export default function ManagerDashboardPage() {
         >
           Sign out
         </button>
+        )}
       </div>
     </Screen>
   );

@@ -13,6 +13,9 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import AdminRoute from "../components/AdminRoute";
 import ManagerRoute from "../components/ManagerRoute";
 import ManagerDashboardPage from "../pages/ManagerDashboardPage";
+import AdminHubPage from "../pages/AdminHubPage";
+import AdminCitiesPage from "../pages/AdminCitiesPage";
+import AdminUsersPage from "../pages/AdminUsersPage";
 
 export default function AppRoutes() {
   return (
@@ -83,6 +86,42 @@ export default function AppRoutes() {
           <ManagerRoute>
             <ManagerDashboardPage />
           </ManagerRoute>
+        }
+      />
+
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminHubPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/cities"
+        element={
+          <AdminRoute>
+            <AdminCitiesPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/users"
+        element={
+          <AdminRoute>
+            <AdminUsersPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/analytics"
+        element={
+          <AdminRoute>
+            <ManagerDashboardPage national />
+          </AdminRoute>
         }
       />
 

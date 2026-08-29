@@ -8,7 +8,7 @@ import {
   SectionLabel,
 } from "../brand/FetaBrand";
 import { useAuth } from "../context/AuthContext";
-import { getCities, saveCities } from "../services/cityService";
+import PageHeader from "../components/PageHeader";
 import {
   getPrizes,
   savePrizes,
@@ -25,18 +25,12 @@ export default function AdminPrizesPage() {
   const [newName, setNewName] = useState("");
   const [password, setPassword] = useState("");
 
-  const [cities, setCities] = useState([]);
-  const [newCity, setNewCity] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [dirty, setDirty] = useState(false);
-
-  useEffect(() => {
-    getCities().then(setCities).catch(() => {});
-  }, []);
 
   useEffect(() => {
     let live = true;
@@ -119,11 +113,10 @@ export default function AdminPrizesPage() {
     try {
       setSaving(true);
       await savePrizes(prizes, user?.username, password.trim());
-      await saveCities(cities, user?.username, password.trim());
       setDirty(false);
       setPassword("");
       setNotice(
-        "Published. BAs will see the new prizes and cities next time they open a setup screen."
+        "Published. BAs will see the new list next time they open a campaign setup screen."
       );
     } catch (err) {
       setError(err.message);
@@ -138,21 +131,11 @@ export default function AdminPrizesPage() {
   return (
     <Screen>
       <div className="flex flex-col flex-1 px-5 pt-8 pb-8">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <FetaMark className="w-12 flex-none" />
-          <div className="min-w-0">
-            <h1
-              className="feta-display text-2xl"
-              style={{ color: FETA.cream, textShadow: `3px 3px 0 ${FETA.ink}` }}
-            >
-              Wheel prizes
-            </h1>
-            <p className="text-xs font-bold mt-1" style={{ color: FETA.amber }}>
-              {activeCount} on the wheel · {prizes.length} in the list
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Wheel prizes"
+          subtitle={`${activeCount} on the wheel · ${prizes.length} in the list`}
+          to="/admin"
+        />
 
         {loading && (
           <p
@@ -299,82 +282,6 @@ export default function AdminPrizesPage() {
             <button
               onClick={add}
               className="feta-press px-5 rounded-xl feta-display text-xs flex-none"
-              style={{
-                background: FETA.amber,
-                color: FETA.ink,
-                boxShadow: `0 0 0 2px ${FETA.gold}, 0 0 0 4px ${FETA.ink}`,
-              }}
-            >
-              Add
-            </button>
-          </div>
-        </div>
-
-        {/* Cities */}
-        <div className="mt-8">
-          <SectionLabel>Cities</SectionLabel>
-          <p
-            className="text-xs font-semibold mb-3"
-            style={{ color: `${FETA.cream}99` }}
-          >
-            These are the options BAs pick from when adding an outlet.
-          </p>
-
-          <div className="space-y-2">
-            {cities.map((c, i) => (
-              <div
-                key={`${c}-${i}`}
-                className="feta-lockup-flat flex items-center gap-2 px-3 py-2"
-                style={{ background: FETA.cream, color: FETA.ink }}
-              >
-                <input
-                  value={c}
-                  onChange={(e) => {
-                    const next = [...cities];
-                    next[i] = e.target.value;
-                    setCities(next);
-                    setDirty(true);
-                  }}
-                  aria-label={`City name ${i + 1}`}
-                  className="feta-field !py-2 !text-sm flex-1"
-                />
-                <button
-                  onClick={() => {
-                    setCities(cities.filter((_, idx) => idx !== i));
-                    setDirty(true);
-                  }}
-                  aria-label={`Remove ${c}`}
-                  className="feta-eyebrow px-3 py-2 rounded-md flex-none"
-                  style={{ background: FETA.red, color: FETA.cream }}
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex gap-2 mt-3">
-            <input
-              value={newCity}
-              onChange={(e) => setNewCity(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && newCity.trim()) {
-                  setCities([...cities, newCity.trim()]);
-                  setNewCity("");
-                  setDirty(true);
-                }
-              }}
-              placeholder="Add a city"
-              className="feta-field flex-1"
-            />
-            <button
-              onClick={() => {
-                if (!newCity.trim()) return;
-                setCities([...cities, newCity.trim()]);
-                setNewCity("");
-                setDirty(true);
-              }}
-              className="feta-press feta-display px-5 rounded-xl flex-none text-xs"
               style={{
                 background: FETA.amber,
                 color: FETA.ink,

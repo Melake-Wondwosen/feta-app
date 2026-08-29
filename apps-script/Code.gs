@@ -69,6 +69,7 @@ function doGet(e) {
     if (action === "getOutlets") return handleGetOutlets_(e);
     if (action === "getPrizes") return handleGetPrizes_(e);
     if (action === "getCities") return handleGetCities_(e);
+    if (action === "getUsers") return handleGetUsers_(e);
     if (action === "getSettings") return handleGetSettings_(e);
     if (action === "managerStats") return handleManagerStats_(e);
     if (action === "generateMyDailyPDF") return handleDailyPDF_(e);
@@ -92,6 +93,7 @@ function doPost(e) {
     if (payload.action === "addWinner") return handleAddWinner_(payload);
     if (payload.action === "savePrizes") return handleSavePrizes_(payload);
     if (payload.action === "saveCities") return handleSaveCities_(payload);
+    if (payload.action === "saveUsers") return handleSaveUsers_(payload);
     if (payload.action === "saveSettings") return handleSaveSettings_(payload);
     if (payload.action === "logSpin") return handleLogSpin_(payload);
     if (payload.action === "ping") return handlePing_(payload);
@@ -358,6 +360,85 @@ function handleSaveCities_(payload) {
   (payload.cities || []).forEach(function (c) {
     const name = String(c.name || "").trim();
     if (name) sheet.appendRow([name, c.active !== false, now]);
+  });
+
+  return json_({ success: true });
+}
+
+// ─── User management ─────────────────────────────────────────────────
+
+/* Returns the full user list including passwords. Gated behind the same
+   canPublish + password check as publishing, since it exposes every
+   credential in one response. */
+function handleGetUsers_(e) {
+  const auth = authorisePublish_({
+    username: e.parameter.username,
+    password: e.parameter.password,
+  });
+  if (!auth.ok) return json_({ success: false, message: auth.message });
+
+  const users = rowsToObjects_(sheet_(SHEET_USERS)).map(function (u) {
+    return {
+      id: u.id,
+      username: u.username,
+      password: u.password,
+      name: u.name,
+      role: u.role || "",
+      region: u.region || "",
+      canPublish: String(u.canPublish).toLowerCase() === "true",
+    };
+  });
+
+  return json_({ success: true, users: users });
+}
+
+function handleSaveUsers_(payload) {
+  const auth = authorisePublish_(payload);
+  if (!auth.ok) return json_({ success: false, message: auth.message });
+
+  const incoming = payload.users || [];
+  if (!incoming.length) {
+    return json_({ success: false, message: "No users to save." });
+  }
+
+  /* Guard against locking everyone out: at least one account must keep
+     publish rights. */
+  const anyPublisher = incoming.some(function (u) {
+    return u.canPublish === true;
+  });
+  if (!anyPublisher) {
+    return json_({
+      success: false,
+      message: "At least one account must keep publish rights.",
+    });
+  }
+
+  const sheet = sheet_(SHEET_USERS);
+  const existing = rowsToObjects_(sheet);
+  const seenBefore = {};
+  existing.forEach(function (u) {
+    seenBefore[String(u.id)] = u.lastSeen || "";
+  });
+
+  sheet.clear();
+  sheet.appendRow([
+    "id", "username", "password", "name",
+    "role", "region", "canPublish", "lastSeen",
+  ]);
+
+  incoming.forEach(function (u) {
+    const id = String(u.id || "").trim() ||
+      "USR-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6);
+    sheet.appendRow([
+      id,
+      String(u.username || "").trim(),
+      String(u.password || ""),
+      String(u.name || "").trim(),
+      String(u.role || "").trim(),
+      String(u.region || "").trim(),
+      u.canPublish === true,
+      seenBefore[id] || "",
+    ]);
   });
 
   return json_({ success: true });
