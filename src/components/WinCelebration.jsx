@@ -112,7 +112,7 @@ export default function WinCelebration({ prize }) {
             height: 90,
             marginLeft: -45,
             zIndex: 3,
-            background: `radial-gradient(circle, #FFFFFF 0%, ${FETA.amber}AA 35%, transparent 68%)`,
+            background: `radial-gradient(circle, ${FETA.amber}DD 0%, ${FETA.gold}88 40%, transparent 68%)`,
           }}
         />
       )}
