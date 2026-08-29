@@ -286,7 +286,7 @@ export default function ManagerDashboardPage({ national = false }) {
             <HeadlineStat
               label="People reached"
               value={stats.peopleReached}
-              sub={`${conversion}% won something · ${(
+              sub={`${conversion}% won a prize · ${(
                 stats.peopleReachedAllTime || 0
               ).toLocaleString()} all time`}
             />
