@@ -214,6 +214,12 @@ export default function HomePage() {
                   blurb: "Usernames, passwords and roles",
                 },
                 {
+                  to: "/admin/preview",
+                  icon: "▶️",
+                  title: "Preview animations",
+                  blurb: "Test what a consumer sees when they win",
+                },
+                {
                   to: "/admin/theme",
                   icon: "🎨",
                   title: "Appearance",

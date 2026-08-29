@@ -1,0 +1,70 @@
+import { FETA, FetaMark } from "../brand/FetaBrand";
+import fetaBottle from "../assets/feta-bottle.png";
+import { bottleCost } from "../services/bottleStock";
+
+/* The celebration shown when a prize is won. Lives here rather than
+   inside the spin screen so the admin preview renders the identical
+   thing — a preview that drifts from production is worse than none. */
+export default function WinCelebration({ prize }) {
+  const bottles = bottleCost(prize);
+
+  if (bottles <= 0) {
+    return <FetaMark className="w-12 mx-auto mb-3" />;
+  }
+
+  const classes =
+    bottles === 1
+      ? ["feta-bottle-solo"]
+      : bottles === 2
+      ? ["feta-cheers-left", "feta-cheers-right"]
+      : ["feta-cheers-left", "feta-cheers-centre", "feta-cheers-right"];
+
+  return (
+    <div
+      className="relative flex items-end justify-center -mt-24 mb-3"
+      style={{ height: 190 }}
+    >
+      <span
+        aria-hidden="true"
+        className="feta-bottle-glow absolute left-1/2 top-1/2 rounded-full pointer-events-none"
+        style={{
+          width: 240,
+          height: 240,
+          marginLeft: -120,
+          marginTop: -120,
+          background: `radial-gradient(circle, ${FETA.amber}DD 0%, ${FETA.gold}66 42%, transparent 70%)`,
+        }}
+      />
+
+      {classes.map((c, i) => (
+        <img
+          key={i}
+          src={fetaBottle}
+          alt=""
+          aria-hidden="true"
+          className={`${c} relative w-auto drop-shadow-[0_10px_18px_rgba(23,17,15,0.5)]`}
+          style={{
+            height: bottles === 1 ? 180 : 168,
+            marginLeft: i === 0 ? 0 : bottles === 3 ? -22 : -14,
+            zIndex: c === "feta-cheers-centre" ? 1 : 2,
+          }}
+        />
+      ))}
+
+      {bottles > 1 && (
+        <span
+          aria-hidden="true"
+          className="feta-clink-spark absolute left-1/2 rounded-full pointer-events-none"
+          style={{
+            top: 14,
+            width: 90,
+            height: 90,
+            marginLeft: -45,
+            zIndex: 3,
+            background: `radial-gradient(circle, #FFFFFF 0%, ${FETA.amber}AA 35%, transparent 68%)`,
+          }}
+        />
+      )}
+    </div>
+  );
+}

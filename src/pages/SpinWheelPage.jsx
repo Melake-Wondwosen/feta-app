@@ -4,7 +4,14 @@ import { FETA, FetaMark, Sunburst, TibebBand } from "../brand/FetaBrand";
 import { API_URL } from "../config";
 import { getWinMessage, fillTemplate, getSettings } from "../services/settingsService";
 import { logSpin } from "../services/statsService";
-import fetaBottle from "../assets/feta-bottle.png";
+import WinCelebration from "../components/WinCelebration";
+import {
+  ensureAudio,
+  playTick,
+  playClink,
+  playWinChime,
+  playNoWinTone,
+} from "../services/sounds";
 import {
   bottleCost,
   isBottlePrize,
@@ -76,88 +83,6 @@ export default function SpinWheelPage() {
   const wheelDegRef = useRef(0);
   const audioCtxRef = useRef(null);
   const lastTickIdxRef = useRef(-1);
-
-  /* Synthesized sound — no audio file to fetch, works offline. A tick
-     plays every time a segment passes the pointer, and a short chime
-     plays on a real win. Created lazily on the first spin tap, since
-     browsers block audio until a user gesture. */
-  function ensureAudio() {
-    if (!audioCtxRef.current) {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (AC) audioCtxRef.current = new AC();
-    }
-    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
-      audioCtxRef.current.resume();
-    }
-    return audioCtxRef.current;
-  }
-
-  function playTick() {
-    const ctx = ensureAudio();
-    if (!ctx) return;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "square";
-    osc.frequency.value = 1400;
-    gain.gain.setValueAtTime(0.05, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.045);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.05);
-  }
-
-  /* Glass clink — two close, bright partials with a fast decay, which
-     is what reads as bottles touching rather than a bell. */
-  function playClink() {
-    const ctx = ensureAudio();
-    if (!ctx) return;
-    [2340, 3150, 4600].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "triangle";
-      osc.frequency.value = freq;
-      const start = ctx.currentTime + i * 0.006;
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.14 / (i + 1), start + 0.004);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.42);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(start);
-      osc.stop(start + 0.45);
-    });
-  }
-
-  function playWinChime() {
-    const ctx = ensureAudio();
-    if (!ctx) return;
-    [660, 880, 1100].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      const start = ctx.currentTime + i * 0.09;
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.12, start + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.28);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(start);
-      osc.stop(start + 0.3);
-    });
-  }
-
-  function playNoWinTone() {
-    const ctx = ensureAudio();
-    if (!ctx) return;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(420, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(220, ctx.currentTime + 0.35);
-    gain.gain.setValueAtTime(0.08, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.4);
-  }
 
   function sliceIndexAt(slices, deg) {
     const normalized = ((-deg % 360) + 360) % 360;
@@ -839,72 +764,8 @@ const NO_WIN_COLOR = { bg: FETA.redDark, fg: "#E9A9AE" };
             className="feta-lockup w-full max-w-sm text-center py-9 px-6"
             style={{ background: `${FETA.cream}F2`, color: FETA.ink }}
           >
-            {bottleCost(regularWinOverlay) > 0 ? (
-              /* Beer wins show the real bottles, sized to break out past
-                 the top of the card. Two or three clink together. */
-              <div
-                className="relative flex items-end justify-center -mt-24 mb-3"
-                style={{ height: 190 }}
-              >
-                <span
-                  aria-hidden="true"
-                  className="feta-bottle-glow absolute left-1/2 top-1/2 rounded-full pointer-events-none"
-                  style={{
-                    width: 240,
-                    height: 240,
-                    marginLeft: -120,
-                    marginTop: -120,
-                    background: `radial-gradient(circle, ${FETA.amber}DD 0%, ${FETA.gold}66 42%, transparent 70%)`,
-                  }}
-                />
+            <WinCelebration prize={regularWinOverlay} />
 
-                {(() => {
-                  const n = bottleCost(regularWinOverlay);
-                  const cls =
-                    n === 1
-                      ? ["feta-bottle-solo"]
-                      : n === 2
-                      ? ["feta-cheers-left", "feta-cheers-right"]
-                      : [
-                          "feta-cheers-left",
-                          "feta-cheers-centre",
-                          "feta-cheers-right",
-                        ];
-
-                  return cls.map((c, i) => (
-                    <img
-                      key={i}
-                      src={fetaBottle}
-                      alt=""
-                      aria-hidden="true"
-                      className={`${c} relative w-auto drop-shadow-[0_10px_18px_rgba(23,17,15,0.5)]`}
-                      style={{
-                        height: n === 1 ? 180 : 168,
-                        marginLeft: i === 0 ? 0 : n === 3 ? -22 : -14,
-                        zIndex: c === "feta-cheers-centre" ? 1 : 2,
-                      }}
-                    />
-                  ));
-                })()}
-
-                {bottleCost(regularWinOverlay) > 1 && (
-                  <span
-                    aria-hidden="true"
-                    className="feta-clink-spark absolute left-1/2 rounded-full pointer-events-none"
-                    style={{
-                      top: 14,
-                      width: 90,
-                      height: 90,
-                      marginLeft: -45,
-                      zIndex: 3,
-                      background: `radial-gradient(circle, #FFFFFF 0%, ${FETA.amber}AA 35%, transparent 68%)`,
-                    }}
-                  />
-                )}
-              </div>
-            ) : (
-              <FetaMark className="w-12 mx-auto mb-3" />
-            )}
             <p className="feta-eyebrow" style={{ color: FETA.redDeep }}>
               🎉 Winner
             </p>
