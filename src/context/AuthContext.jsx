@@ -12,7 +12,7 @@ const PER_USER_PREFIXES = [
   "spin_done_",
 ];
 
-function clearPerUserData() {
+export function clearPerUserData() {
   const doomed = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
@@ -53,6 +53,12 @@ export function AuthProvider({ children }) {
     clearPerUserData();
     localStorage.removeItem("user");
     setUser(null);
+    /* Inside MELA, signing out here signs out of MELA too. */
+    try {
+      if (window.parent !== window) window.parent.postMessage({ mela: "signed-out" }, "*");
+    } catch {
+      /* not in MELA */
+    }
   };
 
   return (

@@ -65,6 +65,7 @@ function doGet(e) {
   const action = e.parameter.action;
 
   try {
+    if (action === "melaSession") return handleMelaSession_(e.parameter.ticket);
     if (action === "login") return handleLogin_(e);
     if (action === "getOutlets") return handleGetOutlets_(e);
     if (action === "getPrizes") return handleGetPrizes_(e);
@@ -89,6 +90,7 @@ function doPost(e) {
   }
 
   try {
+    if (payload.action === "melaSession") return handleMelaSession_(payload.ticket);
     if (payload.action === "addOutlet") return handleAddOutlet_(payload);
     if (payload.action === "addWinner") return handleAddWinner_(payload);
     if (payload.action === "savePrizes") return handleSavePrizes_(payload);
@@ -785,4 +787,61 @@ function seedPrizesIfEmpty_() {
   ];
   const now = new Date();
   fallback.forEach((p) => sheet.appendRow([p[0], p[1], p[2], p[3], p[4], now]));
+}
+
+/* ================= MELA sign-in ================= */
+// MELA, the one-in-all app, signs a person in once and opens this app with a
+// ticket. The ticket names the person's username in this app, is signed with
+// MELA_KEY (Project settings > Script properties, same value as in MELA), and
+// works once, within two minutes of being made.
+
+var MELA_APP_ID = 'feta';
+
+function melaPad_(s) {
+  s = String(s);
+  while (s.length % 4) s += '=';
+  return s;
+}
+
+// Returns the username the ticket is for, or throws with a message for the person.
+function melaTicketUser_(ticket) {
+  var key = PropertiesService.getScriptProperties().getProperty('MELA_KEY');
+  if (!key) throw new Error('MELA sign-in is not switched on for this app yet. Ask your admin to add MELA_KEY.');
+  var parts = String(ticket || '').split('.');
+  if (parts.length !== 2) throw new Error('MELA sign-in link is not valid. Open the app from MELA again.');
+  var want = Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(parts[0], key)).replace(/=+$/, '');
+  if (want !== parts[1]) throw new Error('MELA sign-in link is not valid. Open the app from MELA again.');
+  var p;
+  try { p = JSON.parse(Utilities.newBlob(Utilities.base64DecodeWebSafe(melaPad_(parts[0]))).getDataAsString()); } catch (e) { p = null; }
+  if (!p || p.a !== MELA_APP_ID) throw new Error('MELA sign-in link is for another app.');
+  if (!(p.e > Date.now())) throw new Error('MELA sign-in link has expired. Open the app from MELA again.');
+  var cache = CacheService.getScriptCache();
+  if (cache.get('mela_' + p.n)) throw new Error('MELA sign-in link was already used. Open the app from MELA again.');
+  cache.put('mela_' + p.n, '1', 600);
+  return String(p.u || '').trim().toLowerCase();
+}
+
+// Same answer as the login action, without the password: MELA has already checked it.
+function handleMelaSession_(ticket) {
+  let username;
+  try {
+    username = melaTicketUser_(ticket);
+  } catch (err) {
+    return json_({ success: false, message: err.message });
+  }
+  const users = rowsToObjects_(sheet_(SHEET_USERS));
+  const match = users.find((u) => String(u.username).trim().toLowerCase() === username);
+  if (!match) {
+    return json_({ success: false, message: 'There is no account with the username "' + username + '" in this app. Ask your admin to check MELA.' });
+  }
+  return json_({
+    success: true,
+    user: {
+      id: match.id,
+      username: match.username,
+      name: match.name,
+      role: match.role || "",
+      region: match.region || "",
+    },
+  });
 }
